@@ -69,10 +69,24 @@ _ol_main_parse_color(char* arg, ol_color_byte_t cbyte)
       return cbyte;
     }
 
-  /* TODO: Add increment/decrement support (+10 -10)
-     FIXME: atoi with non-numeric inputs causes undefined behaviour */
+  bool change = false;
+  if (arg[0] == '+' || arg[0] == '-')
+    {
+      arg++;
+      change = true;
+    }
+
+  /* FIXME: atoi with non-numeric inputs causes undefined behaviour */
   int c = atoi(arg);
   c = OL_COLOR_LIMIT(c);
+
+  if (change)
+    {
+      c = (0x80000000 | (c)) ^ (0x80000000 - !!(arg[-1] - 43));
+      if (c & 0x80000000) c++;
+      c += cbyte;
+      return OL_COLOR_LIMIT(c);
+    }
   return c;
 }
 
