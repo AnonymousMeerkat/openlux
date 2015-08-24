@@ -20,14 +20,36 @@
   THE SOFTWARE.
 */
 
-#define color_red(c) (((c) >> 16) & 0xff)
-#define color_green(c) (((c) >> 8) & 0xff)
-#define color_blue(c) ((c) & 0xff)
+#ifndef _OPENLUX_COLOR_H
+#define _OPENLUX_COLOR_H
 
-#define color_init(r, g, b) ((((r) << 16) | ((g) << 8)) | b)
 
-#define color_set_red(c, r) (((r) << 16) | ((c) & 0xffff))
-#define color_set_green(c, g) ((((g) << 8) | (color_red(c) << 16)) | (color_blue(c)))
-#define color_set_blue(c, b) ((b) | ((((c) >> 8) & 0xffff) << 8))
+typedef unsigned int ol_color_t;
+typedef unsigned char ol_color_byte_t;
 
-#define color_limit(c) (((c) > 255) ? 255 : (((c) < 0) ? 0 : (c)))
+
+#define OL_COLOR_LIMIT(c) (((c) > 255) ? 255 : (((c) < 0) ? 0 : (c)))
+#define OL_COLOR_BYTE(c) ((c) & 0xff)
+
+
+#define OL_COLOR_INIT(r, g, b)                  \
+  (((OL_COLOR_BYTE(r) << 16) |                  \
+    (OL_COLOR_BYTE(g) << 8)) |                  \
+   OL_COLOR_BYTE(b))
+
+
+#define OL_COLOR_RED(c) (((c) >> 16) & 0xff)
+#define OL_COLOR_GREEN(c) (((c) >> 8) & 0xff)
+#define OL_COLOR_BLUE(c) ((c) & 0xff)
+
+#define OL_COLOR_RED_GREEN(c) ((((c) >> 8) & 0xffff) << 8)
+#define OL_COLOR_RED_BLUE(c) ((OL_COLOR_RED(c) << 16) | (OL_COLOR_BLUE(c)))
+#define OL_COLOR_GREEN_BLUE(c) ((c) & 0xffff)
+
+
+#define OL_COLOR_SET_RED(c, r) ((OL_COLOR_BYTE(r) << 16) | (OL_COLOR_GREEN_BLUE(c)))
+#define OL_COLOR_SET_GREEN(c, g) (((OL_COLOR_BYTE(g) << 8) | (OL_COLOR_RED_BLUE(c))))
+#define OL_COLOR_SET_BLUE(c, b) ((OL_COLOR_BYTE(b)) | (OL_COLOR_RED_GREEN(c)))
+
+
+#endif

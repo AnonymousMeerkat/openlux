@@ -20,11 +20,13 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_KELVIN_H
-#define _OPENLUX_KELVIN_H
+#ifndef _OPENLUX_BACKEND_X11_H
+#define _OPENLUX_BACKEND_X11_H
 
-#include "color.h"
 
-ol_color_t ol_kelvin_rgb(unsigned int kelvin);
+#include "backend.h"
+
+extern struct ol_backend_s ol_backend_x11;
+
 
 #endif

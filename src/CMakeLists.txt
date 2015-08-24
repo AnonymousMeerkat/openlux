@@ -1,3 +1,5 @@
+add_subdirectory(backend)
+
 set(SOURCES
   kelvin.c
   gamma.c
@@ -5,7 +7,7 @@ set(SOURCES
   )
 
 add_executable(openlux ${SOURCES})
-target_link_libraries(openlux m ${X11_LIBRARIES} ${XF86VM_LIBRARIES})
+target_link_libraries(openlux m ${X11_LIBRARIES} ${XF86VM_LIBRARIES} ol_backend)
 
 install(TARGETS
   openlux

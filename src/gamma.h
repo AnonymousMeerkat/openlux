@@ -20,10 +20,40 @@
   THE SOFTWARE.
 */
 
+#ifndef _OL_GAMMA_H
+#define _OL_GAMMA_H
+
+
+#include <stdlib.h>
+
+
+struct ol_gamma_s
+{
+  unsigned short* red;
+  unsigned short* green;
+  unsigned short* blue;
+};
+
+#define OL_GAMMA_MALLOC(size, gamma)            \
+  {                                             \
+    (gamma).red = malloc((size) * 6);           \
+    (gamma).green = (gamma).red + (size);       \
+    (gamma).blue = (gamma).green + (size);      \
+  }
+
+#define OL_GAMMA_FREE(gamma)                    \
+  {                                             \
+    free((gamma).red);                          \
+  }
+
+
 void
-rgb_to_gamma(unsigned int color, int gamma_ramp_size, unsigned short* red,
+ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
              unsigned short* green, unsigned short* blue);
 
 void
-identity_gamma(int gamma_ramp_size, unsigned short* red,
-               unsigned short* green, unsigned short* blue);
+ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
+                  unsigned short* green, unsigned short* blue);
+
+
+#endif

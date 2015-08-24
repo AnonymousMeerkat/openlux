@@ -20,11 +20,28 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_KELVIN_H
-#define _OPENLUX_KELVIN_H
+#ifndef _OPENLUX_LOG_H
+#define _OPENLUX_LOG_H
 
-#include "color.h"
 
-ol_color_t ol_kelvin_rgb(unsigned int kelvin);
+#include <stdio.h>
+
+#define _OL_LOG_TEMPLATE(head, stream, ...)     \
+  {                                             \
+    fputs("[" head "] ", stream);               \
+    fprintf(stream, __VA_ARGS__);               \
+    fputs("\n", stream);                        \
+  }
+
+#define OL_LOG_INFO(...)                                \
+  {                                                     \
+    _OL_LOG_TEMPLATE("INFO", stdout, __VA_ARGS__);      \
+  }
+
+#define OL_LOG_ERR(...)                                 \
+  {                                                     \
+    _OL_LOG_TEMPLATE("ERR", stderr, __VA_ARGS__);       \
+  }
+
 
 #endif

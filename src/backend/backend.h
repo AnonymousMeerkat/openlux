@@ -20,11 +20,25 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_KELVIN_H
-#define _OPENLUX_KELVIN_H
+#ifndef _OPENLUX_BACKEND_H
+#define _OPENLUX_BACKEND_H
 
-#include "color.h"
 
-ol_color_t ol_kelvin_rgb(unsigned int kelvin);
+struct ol_backend_s;
+struct ol_backend_s
+{
+  void* data;
+  int gamma_ramp_size;
+
+  int (*init)(struct ol_backend_s* backend);
+  void (*uninit)(struct ol_backend_s* backend);
+  void (*get_gamma)(struct ol_backend_s* backend, unsigned short* red,
+                    unsigned short* green, unsigned short* blue);
+  void (*set_gamma)(struct ol_backend_s* backend, unsigned short* red,
+                    unsigned short* green, unsigned short* blue);
+};
+
+int ol_backend_init(struct ol_backend_s* backend);
+
 
 #endif
