@@ -20,4 +20,11 @@
   THE SOFTWARE.
 */
 
-unsigned int kelvin_to_rgb(unsigned int kelvin);
+#ifndef _OPENLUX_KELVIN_H
+#define _OPENLUX_KELVIN_H
+
+#include "color.h"
+
+ol_color_t ol_kelvin_rgb(unsigned int kelvin);
+
+#endif

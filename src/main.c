@@ -24,31 +24,26 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <assert.h>
 #include <stdbool.h>
 #include <string.h>
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86vmode.h>
 
+#include "backend/backend.h"
+#include "log.h"
 #include "color.h"
 #include "gamma.h"
 #include "kelvin.h"
 
-unsigned short* redgamma;
-unsigned short* greengamma;
-unsigned short* bluegamma;
 
-void
-show_version(void)
+static void
+ol_main_version(void)
 {
   puts("openlux v"VERSION_STR);
 }
 
-void
-show_help(char* argv0)
+static void
+ol_main_help(char* argv0)
 {
-  show_version();
+  ol_main_version();
   puts("");
   puts("Usage:");
   printf(" %s [options]\n", argv0);
@@ -66,22 +61,22 @@ show_help(char* argv0)
   puts(" -V, --version       display version information and exit");
 }
 
-int
-parse_color(char* arg)
+static ol_color_byte_t
+_ol_main_parse_color(char* arg, ol_color_byte_t cbyte)
 {
   if (!strcmp(arg, "auto"))
     {
-      return -1;
+      return cbyte;
     }
-  else
-    {
-      int c = atoi(arg);
-      c = color_limit(c);
-      return c;
-    }
+
+  /* TODO: Add increment/decrement support (+10 -10)
+     FIXME: atoi with non-numeric inputs causes undefined behaviour */
+  int c = atoi(arg);
+  c = OL_COLOR_LIMIT(c);
+  return c;
 }
 
-const struct option long_options[] = {
+static struct option _ol_main_long_options[] = {
   {"kelvin",   required_argument, 0, 'k'},
   {"red",      required_argument, 0, 'r'},
   {"green",    required_argument, 0, 'g'},
@@ -96,17 +91,19 @@ int
 main(int argc, char** argv)
 {
   int opt_kelvin = 3400;
-  int opt_red = -1;
-  int opt_green = -1;
-  int opt_blue = -1;
+  char opt_red[256] = "auto";
+  char opt_green[256] = "auto";
+  char opt_blue[256] = "auto";
   bool opt_identity = 0;
 
   int c;
   int option_index;
 
+  struct ol_backend_s backend;
+
   while (1)
     {
-      c = getopt_long(argc, argv, "hVk:r:g:b:i", long_options,
+      c = getopt_long(argc, argv, "hVk:r:g:b:i", _ol_main_long_options,
                       &option_index);
       if (c == -1)
         break;
@@ -115,12 +112,13 @@ main(int argc, char** argv)
         {
         case 0:
           break;
+
         case 'h':
-          show_help(argv[0]);
+          ol_main_help(argv[0]);
           return 0;
 
         case 'V':
-          show_version();
+          ol_main_version();
           return 0;
 
         case 'i':
@@ -132,101 +130,61 @@ main(int argc, char** argv)
           break;
 
         case 'r':
-          opt_red = parse_color(optarg);
+          strcpy(opt_red, optarg);
           break;
 
         case 'g':
-          opt_green = parse_color(optarg);
+          strcpy(opt_green, optarg);
           break;
 
         case 'b':
-          opt_blue = parse_color(optarg);
+          strcpy(opt_blue, optarg);
           break;
 
         default:
-          show_help(argv[0]);
+          ol_main_help(argv[0]);
           return 1;
         }
     }
 
 
-  Display* x_display = XOpenDisplay(NULL);
-
-  if (!x_display)
-    {
-      fprintf(stderr, "Unable to open display\n");
-      return 1;
-    }
-
-  int vidmode_maj, vidmode_min;
-  int extension_event, extension_error;
-
-  if (!XF86VidModeQueryVersion(x_display, &vidmode_maj, &vidmode_min) ||
-      !XF86VidModeQueryExtension(x_display, &extension_event, &extension_error))
-    {
-      fprintf(stderr, "XF86VidMode not supported on your system\n");
-      return 2;
-    }
-
-  int x_screen = DefaultScreen(x_display);
-
-  int gamma_ramp_size = -1;
-  XF86VidModeGetGammaRampSize(x_display, x_screen, &gamma_ramp_size);
-  if (gamma_ramp_size != 1024 && gamma_ramp_size != 256)
-    {
-      fprintf(stderr, "Your bit depth is not supported\n");
-      return 3;
-    }
-
-  if (gamma_ramp_size == -1)
-    {
-      fprintf(stderr, "Unable to find gamma ramp size\n");
-      return 4;
-    }
-
-#define _malloc_or_die(var, size)               \
-  {                                             \
-    (var) = malloc(size);                       \
-    assert(var);                                \
+  if (ol_backend_init(&backend)) {
+    OL_LOG_ERR("Unable to load backend");
+    return 2;
   }
 
-  _malloc_or_die(redgamma, gamma_ramp_size * 2);
-  _malloc_or_die(greengamma, gamma_ramp_size * 2);
-  _malloc_or_die(bluegamma, gamma_ramp_size * 2);
+  struct ol_gamma_s gamma;
 
-#undef _malloc_or_die
+  OL_GAMMA_MALLOC(backend.gamma_ramp_size, gamma);
 
-  unsigned int color;
+  ol_color_t color;
   if (!opt_identity)
     {
-      color = kelvin_to_rgb(opt_kelvin);
+      color = ol_kelvin_rgb(opt_kelvin);
 
-#define _override_color(c) {                            \
-        if (opt_##c != -1)                              \
-          color = color_set_##c(color, opt_##c);        \
-      }
+      color = OL_COLOR_INIT(
+                            _ol_main_parse_color(opt_red,
+                                                 OL_COLOR_RED(color)),
+                            _ol_main_parse_color(opt_green,
+                                                 OL_COLOR_GREEN(color)),
+                            _ol_main_parse_color(opt_blue,
+                                                 OL_COLOR_BLUE(color))
+                            );
 
-      _override_color(red);
-      _override_color(green);
-      _override_color(blue);
-
-#undef _override_color
-
-      rgb_to_gamma(color, gamma_ramp_size, redgamma, greengamma, bluegamma);
+      ol_gamma_rgb(color, backend.gamma_ramp_size, gamma.red,
+                   gamma.green, gamma.blue);
     }
   else
     {
-      identity_gamma(gamma_ramp_size, redgamma, greengamma, bluegamma);
+      ol_gamma_identity(backend.gamma_ramp_size, gamma.red,
+                        gamma.green, gamma.blue);
     }
 
-  XF86VidModeSetGammaRamp(x_display, x_screen, gamma_ramp_size,
-                          redgamma, greengamma, bluegamma);
+  backend.set_gamma(&backend, gamma.red, gamma.green, gamma.blue);
 
-  XCloseDisplay(x_display);
+  OL_GAMMA_FREE(gamma);
 
-  free(redgamma);
-  free(greengamma);
-  free(bluegamma);
+  backend.uninit(&backend);
 
   return 0;
 }

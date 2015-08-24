@@ -24,7 +24,7 @@
 #include "color.h"
 
 void
-rgb_to_gamma(unsigned int color, int gamma_ramp_size, unsigned short* red,
+ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
              unsigned short* green, unsigned short* blue)
 {
   /* Calculated */
@@ -38,11 +38,11 @@ rgb_to_gamma(unsigned int color, int gamma_ramp_size, unsigned short* red,
   unsigned int bluec  = 0;
 
   /* Increment */
-  unsigned int redi   = 0xffff * color_red(color);
-  unsigned int greeni = 0xffff * color_green(color);
-  unsigned int bluei  = 0xffff * color_blue(color);
+  unsigned int redi   = 0xffff * OL_COLOR_RED(color);
+  unsigned int greeni = 0xffff * OL_COLOR_GREEN(color);
+  unsigned int bluei  = 0xffff * OL_COLOR_BLUE(color);
 
-  unsigned int range = 255 * (gamma_ramp_size - 1);
+  unsigned int range = 0xff * (gamma_ramp_size - 1);
 
   for (int i = 0; i < gamma_ramp_size; i++)
     {
@@ -61,8 +61,8 @@ rgb_to_gamma(unsigned int color, int gamma_ramp_size, unsigned short* red,
 }
 
 void
-identity_gamma(int gamma_ramp_size, unsigned short* red,
-               unsigned short* green, unsigned short* blue)
+ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
+                  unsigned short* green, unsigned short* blue)
 {
   for (int i = 0; i < gamma_ramp_size; i++)
     {

@@ -20,40 +20,28 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#ifndef _OPENLUX_LOG_H
+#define _OPENLUX_LOG_H
 
 
-#include <stdlib.h>
+#include <stdio.h>
 
-
-struct ol_gamma_s
-{
-  unsigned short* red;
-  unsigned short* green;
-  unsigned short* blue;
-};
-
-#define OL_GAMMA_MALLOC(size, gamma)            \
+#define _OL_LOG_TEMPLATE(head, stream, ...)     \
   {                                             \
-    (gamma).red = malloc((size) * 6);           \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
+    fputs("[" head "] ", stream);               \
+    fprintf(stream, __VA_ARGS__);               \
+    fputs("\n", stream);                        \
   }
 
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
+#define OL_LOG_INFO(...)                                \
+  {                                                     \
+    _OL_LOG_TEMPLATE("INFO", stdout, __VA_ARGS__);      \
   }
 
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
-             unsigned short* green, unsigned short* blue);
-
-void
-ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
-                  unsigned short* green, unsigned short* blue);
+#define OL_LOG_ERR(...)                                 \
+  {                                                     \
+    _OL_LOG_TEMPLATE("ERR", stderr, __VA_ARGS__);       \
+  }
 
 
 #endif

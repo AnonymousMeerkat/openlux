@@ -20,40 +20,25 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#ifndef _OPENLUX_BACKEND_H
+#define _OPENLUX_BACKEND_H
 
 
-#include <stdlib.h>
-
-
-struct ol_gamma_s
+struct ol_backend_s;
+struct ol_backend_s
 {
-  unsigned short* red;
-  unsigned short* green;
-  unsigned short* blue;
+  void* data;
+  int gamma_ramp_size;
+
+  int (*init)(struct ol_backend_s* backend);
+  void (*uninit)(struct ol_backend_s* backend);
+  void (*get_gamma)(struct ol_backend_s* backend, unsigned short* red,
+                    unsigned short* green, unsigned short* blue);
+  void (*set_gamma)(struct ol_backend_s* backend, unsigned short* red,
+                    unsigned short* green, unsigned short* blue);
 };
 
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc((size) * 6);           \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
-  }
-
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
-  }
-
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
-             unsigned short* green, unsigned short* blue);
-
-void
-ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
-                  unsigned short* green, unsigned short* blue);
+int ol_backend_init(struct ol_backend_s* backend);
 
 
 #endif
