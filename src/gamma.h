@@ -27,16 +27,21 @@
 #include <stdlib.h>
 
 
+typedef unsigned short ol_gamma_t;
+
 struct ol_gamma_s
 {
-  unsigned short* red;
-  unsigned short* green;
-  unsigned short* blue;
+  ol_gamma_t* red;
+  ol_gamma_t* green;
+  ol_gamma_t* blue;
 };
+
+#define OL_GAMMA_ELEMENTS(size) ((size) * 3)
+#define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
 
 #define OL_GAMMA_MALLOC(size, gamma)            \
   {                                             \
-    (gamma).red = malloc((size) * 6);           \
+    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
     (gamma).green = (gamma).red + (size);       \
     (gamma).blue = (gamma).green + (size);      \
   }
@@ -48,12 +53,11 @@ struct ol_gamma_s
 
 
 void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
-             unsigned short* green, unsigned short* blue);
+ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
+             struct ol_gamma_s gamma);
 
 void
-ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
-                  unsigned short* green, unsigned short* blue);
+ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
 
 
 #endif

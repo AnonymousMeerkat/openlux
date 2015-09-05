@@ -20,53 +20,28 @@
   THE SOFTWARE.
 */
 
-#include "gamma.h"
-#include "color.h"
+#ifndef _OPENLUX_BACKEND_OS_H
+#define _OPENLUX_BACKEND_OS_H
 
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma)
+
+#include <stdio.h>
+
+#define OL_BACKEND_OS_IS_FILE 1
+#define OL_BACKEND_OS_IS_DIR  2
+
+struct ol_backend_os_s;
+struct ol_backend_os_s
 {
-  /* Calculated */
-  ol_gamma_t cred   = 0;
-  ol_gamma_t cgreen = 0;
-  ol_gamma_t cblue  = 0;
+  void* data;
 
-  /* Current */
-  unsigned int redc   = 0;
-  unsigned int greenc = 0;
-  unsigned int bluec  = 0;
+  int (*init)(struct ol_backend_os_s* self);
+  void (*uninit)(struct ol_backend_os_s* self);
 
-  /* Increment */
-  unsigned int redi   = 0xffff * OL_COLOR_RED(color);
-  unsigned int greeni = 0xffff * OL_COLOR_GREEN(color);
-  unsigned int bluei  = 0xffff * OL_COLOR_BLUE(color);
+  FILE* (*open)(struct ol_backend_os_s* self, char* name, char* mode);
+  int (*exists)(struct ol_backend_os_s* self, char* name);
+};
 
-  unsigned int range = 0xff * (gamma_ramp_size - 1);
+int ol_backend_os_init(struct ol_backend_os_s* self);
 
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-      cred = redc / range;
-      redc += redi;
-      gamma.red[i] = cred;
 
-      cgreen = greenc / range;
-      greenc += greeni;
-      gamma.green[i] = cgreen;
-
-      cblue = bluec / range;
-      bluec += bluei;
-      gamma.blue[i] = cblue;
-    }
-}
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma)
-{
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-      gamma.red[i] = i << 8;
-      gamma.green[i] = i << 8;
-      gamma.blue[i] = i << 8;
-    }
-}
+#endif

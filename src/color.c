@@ -20,53 +20,37 @@
   THE SOFTWARE.
 */
 
-#include "gamma.h"
 #include "color.h"
 
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma)
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+ol_color_byte_t
+ol_color_parse(char* str, ol_color_byte_t old_color)
 {
-  /* Calculated */
-  ol_gamma_t cred   = 0;
-  ol_gamma_t cgreen = 0;
-  ol_gamma_t cblue  = 0;
-
-  /* Current */
-  unsigned int redc   = 0;
-  unsigned int greenc = 0;
-  unsigned int bluec  = 0;
-
-  /* Increment */
-  unsigned int redi   = 0xffff * OL_COLOR_RED(color);
-  unsigned int greeni = 0xffff * OL_COLOR_GREEN(color);
-  unsigned int bluei  = 0xffff * OL_COLOR_BLUE(color);
-
-  unsigned int range = 0xff * (gamma_ramp_size - 1);
-
-  for (int i = 0; i < gamma_ramp_size; i++)
+  if (!strcmp(str, "auto"))
     {
-      cred = redc / range;
-      redc += redi;
-      gamma.red[i] = cred;
-
-      cgreen = greenc / range;
-      greenc += greeni;
-      gamma.green[i] = cgreen;
-
-      cblue = bluec / range;
-      bluec += bluei;
-      gamma.blue[i] = cblue;
+      return old_color;
     }
-}
 
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma)
-{
-  for (int i = 0; i < gamma_ramp_size; i++)
+  bool change = false;
+  if (str[0] == '+' || str[0] == '-')
     {
-      gamma.red[i] = i << 8;
-      gamma.green[i] = i << 8;
-      gamma.blue[i] = i << 8;
+      str++;
+      change = true;
     }
+
+  /* FIXME: atoi with non-numeric inputs causes undefined behaviour */
+  int c = atoi(str);
+  c = OL_COLOR_LIMIT(c);
+
+  if (change)
+    {
+      c = (0x80000000 | (c)) ^ (0x80000000 - !!(str[-1] - 43));
+      if (c & 0x80000000) c++;
+      c += old_color;
+      return OL_COLOR_LIMIT(c);
+    }
+  return c;
 }

@@ -27,7 +27,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "backend/backend.h"
+#include "backend/video/video.h"
+#include "backend/os/os.h"
 #include "log.h"
 #include "color.h"
 #include "gamma.h"
@@ -55,39 +56,13 @@ ol_main_help(char* argv0)
   puts(" -r, --red           red color channel (0-255, default: auto)");
   puts(" -g, --green         green color channel (0-255, default: auto)");
   puts(" -b, --blue          blue color channel (0-255, default: auto)");
-  puts(" -i, --identity      resets display color");
+  puts(" -i, --identity      sets display gamma to identity");
+  puts(" -R, --reset         resets display gamma to last saved gamma");
+  puts(" -s, --save          saves current gamma (automatically done when openlux");
+  puts("                         is run for the first time on boot)");
   puts("");
   puts(" -h, --help          display this help and exit");
   puts(" -V, --version       display version information and exit");
-}
-
-static ol_color_byte_t
-_ol_main_parse_color(char* arg, ol_color_byte_t cbyte)
-{
-  if (!strcmp(arg, "auto"))
-    {
-      return cbyte;
-    }
-
-  bool change = false;
-  if (arg[0] == '+' || arg[0] == '-')
-    {
-      arg++;
-      change = true;
-    }
-
-  /* FIXME: atoi with non-numeric inputs causes undefined behaviour */
-  int c = atoi(arg);
-  c = OL_COLOR_LIMIT(c);
-
-  if (change)
-    {
-      c = (0x80000000 | (c)) ^ (0x80000000 - !!(arg[-1] - 43));
-      if (c & 0x80000000) c++;
-      c += cbyte;
-      return OL_COLOR_LIMIT(c);
-    }
-  return c;
 }
 
 static struct option _ol_main_long_options[] = {
@@ -96,6 +71,8 @@ static struct option _ol_main_long_options[] = {
   {"green",    required_argument, 0, 'g'},
   {"blue",     required_argument, 0, 'b'},
   {"identity", no_argument,       0, 'i'},
+  {"reset",    no_argument,       0, 'R'},
+  {"save",     no_argument,       0, 's'},
   {"help",     no_argument,       0, 'h'},
   {"version",  no_argument,       0, 'V'},
   {0, 0, 0, 0}
@@ -104,20 +81,30 @@ static struct option _ol_main_long_options[] = {
 int
 main(int argc, char** argv)
 {
+  int ret = 0;
+
   int opt_kelvin = 3400;
   char opt_red[256] = "auto";
   char opt_green[256] = "auto";
   char opt_blue[256] = "auto";
   bool opt_identity = 0;
+  bool opt_save = 0;
+  bool opt_reset = 0;
 
   int c;
   int option_index;
 
-  struct ol_backend_s backend;
+  struct ol_backend_video_s video;
+  struct ol_backend_os_s os;
+
+  struct ol_gamma_s gamma;
+  FILE* gamma_file;
+
+  /*** Parse arguments ***/
 
   while (1)
     {
-      c = getopt_long(argc, argv, "hVk:r:g:b:i", _ol_main_long_options,
+      c = getopt_long(argc, argv, "hVk:r:g:b:iRs", _ol_main_long_options,
                       &option_index);
       if (c == -1)
         break;
@@ -137,6 +124,14 @@ main(int argc, char** argv)
 
         case 'i':
           opt_identity = 1;
+          break;
+
+        case 'R':
+          opt_reset = 1;
+          break;
+
+        case 's':
+          opt_save = 1;
           break;
 
         case 'k':
@@ -162,43 +157,85 @@ main(int argc, char** argv)
     }
 
 
-  if (ol_backend_init(&backend)) {
-    OL_LOG_ERR("Unable to load backend");
-    return 2;
-  }
+  /*** Load backends ***/
 
-  struct ol_gamma_s gamma;
-
-  OL_GAMMA_MALLOC(backend.gamma_ramp_size, gamma);
-
-  ol_color_t color;
-  if (!opt_identity)
+  if (ol_backend_os_init(&os))
     {
-      color = ol_kelvin_rgb(opt_kelvin);
+      OL_LOG_ERR("Unable to load platform backend");
+      return 2;
+    }
+
+  if (ol_backend_video_init(&video))
+    {
+      OL_LOG_ERR("Unable to load video backend");
+
+      ret = 3;
+      goto free_os;
+    }
+
+
+
+  OL_GAMMA_MALLOC(video.gamma_ramp_size, gamma);
+
+  if (!os.exists(&os, "gamma") || opt_save)
+    {
+      /* Save gamma */
+      video.get_gamma(&video, gamma);
+
+      gamma_file = os.open(&os, "gamma", "wb");
+      fwrite(gamma.red,
+             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video.gamma_ramp_size),
+             gamma_file);
+      fclose(gamma_file);
+
+      if (opt_save)
+        goto start_end;
+    }
+
+
+  /*** Load gamma ***/
+  if (opt_reset)
+    {
+      gamma_file = os.open(&os, "gamma", "rb");
+      fread(gamma.red,
+             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video.gamma_ramp_size),
+             gamma_file);
+      fclose(gamma_file);
+    }
+  else if (!opt_identity)
+    {
+      ol_color_t color = ol_kelvin_rgb(opt_kelvin);
 
       color = OL_COLOR_INIT(
-                            _ol_main_parse_color(opt_red,
-                                                 OL_COLOR_RED(color)),
-                            _ol_main_parse_color(opt_green,
-                                                 OL_COLOR_GREEN(color)),
-                            _ol_main_parse_color(opt_blue,
-                                                 OL_COLOR_BLUE(color))
+                            ol_color_parse(opt_red,
+                                           OL_COLOR_RED(color)),
+                            ol_color_parse(opt_green,
+                                           OL_COLOR_GREEN(color)),
+                            ol_color_parse(opt_blue,
+                                           OL_COLOR_BLUE(color))
                             );
 
-      ol_gamma_rgb(color, backend.gamma_ramp_size, gamma.red,
-                   gamma.green, gamma.blue);
+      ol_gamma_rgb(color, video.gamma_ramp_size, gamma);
     }
   else
     {
-      ol_gamma_identity(backend.gamma_ramp_size, gamma.red,
-                        gamma.green, gamma.blue);
+      ol_gamma_identity(video.gamma_ramp_size, gamma);
     }
 
-  backend.set_gamma(&backend, gamma.red, gamma.green, gamma.blue);
+  /*** Set gamma ***/
+  video.set_gamma(&video, gamma);
 
+
+  /*** End ***/
+ start_end:
+ free_gamma:
   OL_GAMMA_FREE(gamma);
 
-  backend.uninit(&backend);
+ free_video:
+  video.uninit(&video);
+ free_os:
+  os.uninit(&os);
 
-  return 0;
+ end:
+  return ret;
 }

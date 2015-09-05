@@ -8,6 +8,9 @@ set(VERSION_STR "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 add_definitions("-DVERSION_STR=\"${VERSION_STR}\"")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -std=gnu99")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+
+set(CMAKE_BUILD_TYPE "Debug")
 
 find_package(X11 REQUIRED)
 find_package(PkgConfig REQUIRED)

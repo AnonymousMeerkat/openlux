@@ -20,53 +20,14 @@
   THE SOFTWARE.
 */
 
-#include "gamma.h"
-#include "color.h"
+#ifndef _OPENLUX_UTIL_H
+#define _OPENLUX_UTIL_H
 
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma)
-{
-  /* Calculated */
-  ol_gamma_t cred   = 0;
-  ol_gamma_t cgreen = 0;
-  ol_gamma_t cblue  = 0;
 
-  /* Current */
-  unsigned int redc   = 0;
-  unsigned int greenc = 0;
-  unsigned int bluec  = 0;
+#define OL_UTIL_CAT_RAW(x, y) x ## y
+#define OL_UTIL_CAT(x, y) OL_UTIL_CAT_RAW(x, y)
+#define OL_UTIL_STR_RAW(x) #x
+#define OL_UTIL_STR(x) OL_UTIL_STR(x)
 
-  /* Increment */
-  unsigned int redi   = 0xffff * OL_COLOR_RED(color);
-  unsigned int greeni = 0xffff * OL_COLOR_GREEN(color);
-  unsigned int bluei  = 0xffff * OL_COLOR_BLUE(color);
 
-  unsigned int range = 0xff * (gamma_ramp_size - 1);
-
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-      cred = redc / range;
-      redc += redi;
-      gamma.red[i] = cred;
-
-      cgreen = greenc / range;
-      greenc += greeni;
-      gamma.green[i] = cgreen;
-
-      cblue = bluec / range;
-      bluec += bluei;
-      gamma.blue[i] = cblue;
-    }
-}
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma)
-{
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-      gamma.red[i] = i << 8;
-      gamma.green[i] = i << 8;
-      gamma.blue[i] = i << 8;
-    }
-}
+#endif

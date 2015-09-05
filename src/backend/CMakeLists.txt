@@ -1,6 +1,2 @@
-set(SOURCES
-  x11.c
-  backend.c
-  )
-
-add_library(ol_backend STATIC ${SOURCES})
+add_subdirectory(video)
+add_subdirectory(os)

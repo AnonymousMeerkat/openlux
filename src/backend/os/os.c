@@ -20,13 +20,26 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_BACKEND_X11_H
-#define _OPENLUX_BACKEND_X11_H
+#include "os.h"
 
 
-#include "backend.h"
+#define OL_BACKEND_PREFIX os
+#include "../backend.h"
 
-extern struct ol_backend_s ol_backend_x11;
+OL_BACKEND_INIT(posix);
+OL_BACKEND_LIST() =
+{
+  OL_BACKEND_LIST_ITEM(posix),
+  OL_BACKEND_LIST_END()
+};
 
 
-#endif
+int
+ol_backend_os_init(struct ol_backend_os_s* self)
+{
+  int ret;
+
+  OL_BACKEND_FIND(ret);
+
+  return ret;
+}
