@@ -20,44 +20,28 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#ifndef _OPENLUX_BACKEND_OS_H
+#define _OPENLUX_BACKEND_OS_H
 
 
-#include <stdlib.h>
+#include <stdio.h>
 
+#define OL_BACKEND_OS_IS_FILE 1
+#define OL_BACKEND_OS_IS_DIR  2
 
-typedef unsigned short ol_gamma_t;
-
-struct ol_gamma_s
+struct ol_backend_os_s;
+struct ol_backend_os_s
 {
-  ol_gamma_t* red;
-  ol_gamma_t* green;
-  ol_gamma_t* blue;
+  void* data;
+
+  int (*init)(struct ol_backend_os_s* self);
+  void (*uninit)(struct ol_backend_os_s* self);
+
+  FILE* (*open)(struct ol_backend_os_s* self, char* name, char* mode);
+  int (*exists)(struct ol_backend_os_s* self, char* name);
 };
 
-#define OL_GAMMA_ELEMENTS(size) ((size) * 3)
-#define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
-
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
-  }
-
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
-  }
-
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma);
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
+int ol_backend_os_init(struct ol_backend_os_s* self);
 
 
 #endif

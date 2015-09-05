@@ -20,13 +20,14 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_BACKEND_X11_H
-#define _OPENLUX_BACKEND_X11_H
+#ifndef _OPENLUX_UTIL_H
+#define _OPENLUX_UTIL_H
 
 
-#include "backend.h"
-
-extern struct ol_backend_s ol_backend_x11;
+#define OL_UTIL_CAT_RAW(x, y) x ## y
+#define OL_UTIL_CAT(x, y) OL_UTIL_CAT_RAW(x, y)
+#define OL_UTIL_STR_RAW(x) #x
+#define OL_UTIL_STR(x) OL_UTIL_STR(x)
 
 
 #endif

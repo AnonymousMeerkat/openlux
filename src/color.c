@@ -20,44 +20,37 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#include "color.h"
 
-
+#include <stdbool.h>
+#include <string.h>
 #include <stdlib.h>
 
-
-typedef unsigned short ol_gamma_t;
-
-struct ol_gamma_s
+ol_color_byte_t
+ol_color_parse(char* str, ol_color_byte_t old_color)
 {
-  ol_gamma_t* red;
-  ol_gamma_t* green;
-  ol_gamma_t* blue;
-};
+  if (!strcmp(str, "auto"))
+    {
+      return old_color;
+    }
 
-#define OL_GAMMA_ELEMENTS(size) ((size) * 3)
-#define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
+  bool change = false;
+  if (str[0] == '+' || str[0] == '-')
+    {
+      str++;
+      change = true;
+    }
 
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
-  }
+  /* FIXME: atoi with non-numeric inputs causes undefined behaviour */
+  int c = atoi(str);
+  c = OL_COLOR_LIMIT(c);
 
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
-  }
-
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma);
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
-
-
-#endif
+  if (change)
+    {
+      c = (0x80000000 | (c)) ^ (0x80000000 - !!(str[-1] - 43));
+      if (c & 0x80000000) c++;
+      c += old_color;
+      return OL_COLOR_LIMIT(c);
+    }
+  return c;
+}

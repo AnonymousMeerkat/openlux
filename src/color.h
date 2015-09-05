@@ -51,5 +51,6 @@ typedef unsigned char ol_color_byte_t;
 #define OL_COLOR_SET_GREEN(c, g) (((OL_COLOR_BYTE(g) << 8) | (OL_COLOR_RED_BLUE(c))))
 #define OL_COLOR_SET_BLUE(c, b) ((OL_COLOR_BYTE(b)) | (OL_COLOR_RED_GREEN(c)))
 
+ol_color_byte_t ol_color_parse(char* str, ol_color_byte_t old_color);
 
 #endif

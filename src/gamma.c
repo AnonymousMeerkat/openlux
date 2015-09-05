@@ -24,13 +24,13 @@
 #include "color.h"
 
 void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
-             unsigned short* green, unsigned short* blue)
+ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
+             struct ol_gamma_s gamma)
 {
   /* Calculated */
-  unsigned short cred   = 0;
-  unsigned short cgreen = 0;
-  unsigned short cblue  = 0;
+  ol_gamma_t cred   = 0;
+  ol_gamma_t cgreen = 0;
+  ol_gamma_t cblue  = 0;
 
   /* Current */
   unsigned int redc   = 0;
@@ -48,26 +48,25 @@ ol_gamma_rgb(unsigned int color, int gamma_ramp_size, unsigned short* red,
     {
       cred = redc / range;
       redc += redi;
-      red[i] = cred;
+      gamma.red[i] = cred;
 
       cgreen = greenc / range;
       greenc += greeni;
-      green[i] = cgreen;
+      gamma.green[i] = cgreen;
 
       cblue = bluec / range;
       bluec += bluei;
-      blue[i] = cblue;
+      gamma.blue[i] = cblue;
     }
 }
 
 void
-ol_gamma_identity(int gamma_ramp_size, unsigned short* red,
-                  unsigned short* green, unsigned short* blue)
+ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma)
 {
   for (int i = 0; i < gamma_ramp_size; i++)
     {
-      red[i] = i << 8;
-      green[i] = i << 8;
-      blue[i] = i << 8;
+      gamma.red[i] = i << 8;
+      gamma.green[i] = i << 8;
+      gamma.blue[i] = i << 8;
     }
 }

@@ -20,44 +20,26 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#include "os.h"
 
 
-#include <stdlib.h>
+#define OL_BACKEND_PREFIX os
+#include "../backend.h"
 
-
-typedef unsigned short ol_gamma_t;
-
-struct ol_gamma_s
+OL_BACKEND_INIT(posix);
+OL_BACKEND_LIST() =
 {
-  ol_gamma_t* red;
-  ol_gamma_t* green;
-  ol_gamma_t* blue;
+  OL_BACKEND_LIST_ITEM(posix),
+  OL_BACKEND_LIST_END()
 };
 
-#define OL_GAMMA_ELEMENTS(size) ((size) * 3)
-#define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
 
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
-  }
+int
+ol_backend_os_init(struct ol_backend_os_s* self)
+{
+  int ret;
 
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
-  }
+  OL_BACKEND_FIND(ret);
 
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma);
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
-
-
-#endif
+  return ret;
+}

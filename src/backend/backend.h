@@ -24,21 +24,41 @@
 #define _OPENLUX_BACKEND_H
 
 
-struct ol_backend_s;
-struct ol_backend_s
-{
-  void* data;
-  int gamma_ramp_size;
+#include "../util.h"
 
-  int (*init)(struct ol_backend_s* backend);
-  void (*uninit)(struct ol_backend_s* backend);
-  void (*get_gamma)(struct ol_backend_s* backend, unsigned short* red,
-                    unsigned short* green, unsigned short* blue);
-  void (*set_gamma)(struct ol_backend_s* backend, unsigned short* red,
-                    unsigned short* green, unsigned short* blue);
-};
 
-int ol_backend_init(struct ol_backend_s* backend);
+#define _OL_BACKEND_JOIN(x, y) OL_UTIL_CAT(OL_UTIL_CAT(x, _), y)
+#define _OL_BACKEND_NAME_PREFIX() _OL_BACKEND_JOIN(ol_backend, OL_BACKEND_PREFIX)
+#define _OL_BACKEND_NAME_SUBPREFIX(sub) _OL_BACKEND_JOIN(_OL_BACKEND_NAME_PREFIX(), sub)
+#define _OL_BACKEND_NAME_SUBINIT(sub) _OL_BACKEND_JOIN(_OL_BACKEND_NAME_SUBPREFIX(sub), init)
+#define _OL_BACKEND_NAME_LIST() _OL_BACKEND_JOIN(_OL_BACKEND_NAME_PREFIX(), list)
+#define _OL_BACKEND_NAME_STRUCT() _OL_BACKEND_JOIN(_OL_BACKEND_NAME_PREFIX(), s)
+#define _OL_BACKEND_NAME_DATA() _OL_BACKEND_JOIN(_OL_BACKEND_NAME_PREFIX(), data_s)
+#define _OL_BACKEND_STRUCT() struct _OL_BACKEND_NAME_STRUCT()
 
+#define OL_BACKEND_INIT(sub) extern struct _OL_BACKEND_NAME_STRUCT() _OL_BACKEND_NAME_SUBPREFIX(sub)
+
+#define OL_BACKEND_LIST() static _OL_BACKEND_STRUCT()* _OL_BACKEND_NAME_LIST()[]
+  ; /* emacs */
+#define OL_BACKEND_LIST_ITEM(sub) &_OL_BACKEND_NAME_SUBPREFIX(sub)
+#define OL_BACKEND_LIST_END() 0
+
+#define OL_BACKEND_FIND(ret)                                            \
+  {                                                                     \
+    for (_OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST();;i++)        \
+      {                                                                 \
+        *self = **i;                                                    \
+        (ret) = (*i)->init(self);                                       \
+        if (!(ret))                                                     \
+          {                                                             \
+            break;                                                      \
+          }                                                             \
+      }                                                                 \
+  }
+
+#define OL_BACKEND_DATA_INIT(data) struct _OL_BACKEND_NAME_DATA()* data = malloc(sizeof(struct _OL_BACKEND_NAME_DATA()))
+
+#define OL_BACKEND_DATA()                                               \
+  ((struct _OL_BACKEND_NAME_DATA()*)(self->data))
 
 #endif

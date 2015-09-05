@@ -20,44 +20,28 @@
   THE SOFTWARE.
 */
 
-#ifndef _OL_GAMMA_H
-#define _OL_GAMMA_H
+#ifndef _OPENLUX_BACKEND_VIDEO_H
+#define _OPENLUX_BACKEND_VIDEO_H
 
 
-#include <stdlib.h>
+#include "../../gamma.h"
 
-
-typedef unsigned short ol_gamma_t;
-
-struct ol_gamma_s
+struct ol_backend_video_s;
+struct ol_backend_video_s
 {
-  ol_gamma_t* red;
-  ol_gamma_t* green;
-  ol_gamma_t* blue;
+  void* data;
+  int gamma_ramp_size;
+
+  int (*init)(struct ol_backend_video_s* self);
+  void (*uninit)(struct ol_backend_video_s* self);
+  void (*get_gamma)(struct ol_backend_video_s* self,
+                    struct ol_gamma_s gamma);
+  void (*set_gamma)(struct ol_backend_video_s* self,
+                    struct ol_gamma_s gamma);
 };
 
-#define OL_GAMMA_ELEMENTS(size) ((size) * 3)
-#define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
-
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
-  }
-
-#define OL_GAMMA_FREE(gamma)                    \
-  {                                             \
-    free((gamma).red);                          \
-  }
-
-
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma);
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
+int
+ol_backend_video_init(struct ol_backend_video_s* self);
 
 
 #endif

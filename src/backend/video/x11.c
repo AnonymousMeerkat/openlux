@@ -20,30 +20,33 @@
   THE SOFTWARE.
 */
 
-#include "x11.h"
-#include "../log.h"
+#include "video.h"
+#include "../../log.h"
 
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
 
-struct _ol_backend_x11_data
+#define OL_BACKEND_PREFIX video_x11
+#include "../backend.h"
+
+
+struct ol_backend_video_x11_data_s
 {
   Display* display;
   int screen;
 };
-#define _OL_DATA(backend) ((struct _ol_backend_x11_data*)((backend)->data))
+
 
 static int
-_ol_backend_x11_init(struct ol_backend_s* backend)
+ol_backend_x11_init(struct ol_backend_video_s* self)
 {
   int ret = 0;
 
   int vidmode_maj, vidmode_min;
   int extension_event, extension_error;
 
-  struct _ol_backend_x11_data* data =
-    malloc(sizeof(struct _ol_backend_x11_data));
+  OL_BACKEND_DATA_INIT(data);
   int gamma_ramp_size;
 
 
@@ -91,8 +94,8 @@ _ol_backend_x11_init(struct ol_backend_s* backend)
     }
 
 
-  backend->data = data;
-  backend->gamma_ramp_size = gamma_ramp_size;
+  self->data = data;
+  self->gamma_ramp_size = gamma_ramp_size;
 
   goto end;
  badend:
@@ -102,36 +105,38 @@ _ol_backend_x11_init(struct ol_backend_s* backend)
 }
 
 static void
-_ol_backend_x11_uninit(struct ol_backend_s* backend)
+ol_backend_x11_uninit(struct ol_backend_video_s* self)
 {
-  XCloseDisplay(_OL_DATA(backend)->display);
-  free(backend->data);
+  XCloseDisplay(OL_BACKEND_DATA()->display);
+  free(self->data);
 }
 
 
 static void
-_ol_backend_x11_get_gamma(struct ol_backend_s* backend, unsigned short* red,
-                               unsigned short* green, unsigned short* blue)
+ol_backend_x11_get_gamma(struct ol_backend_video_s* self,
+                          struct ol_gamma_s gamma)
 {
-  XF86VidModeGetGammaRamp(_OL_DATA(backend)->display, _OL_DATA(backend)->screen,
-                          backend->gamma_ramp_size, red, green, blue);
+  XF86VidModeGetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
+                          self->gamma_ramp_size,
+                          gamma.red, gamma.green, gamma.blue);
 }
 
 static void
-_ol_backend_x11_set_gamma(struct ol_backend_s* backend, unsigned short* red,
-                               unsigned short* green, unsigned short* blue)
+ol_backend_x11_set_gamma(struct ol_backend_video_s* self,
+                          struct ol_gamma_s gamma)
 {
-  XF86VidModeSetGammaRamp(_OL_DATA(backend)->display, _OL_DATA(backend)->screen,
-                          backend->gamma_ramp_size, red, green, blue);
+  XF86VidModeSetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
+                          self->gamma_ramp_size,
+                          gamma.red, gamma.green, gamma.blue);
 }
 
-struct ol_backend_s ol_backend_x11 =
+struct ol_backend_video_s ol_backend_video_x11 =
 {
   .data = NULL,
   .gamma_ramp_size = 0,
 
-  .init = _ol_backend_x11_init,
-  .uninit = _ol_backend_x11_uninit,
-  .get_gamma = _ol_backend_x11_get_gamma,
-  .set_gamma = _ol_backend_x11_set_gamma
+  .init = ol_backend_x11_init,
+  .uninit = ol_backend_x11_uninit,
+  .get_gamma = ol_backend_x11_get_gamma,
+  .set_gamma = ol_backend_x11_set_gamma
 };
