@@ -38,8 +38,8 @@ struct ol_backend_video_x11_data_s
 };
 
 
-static int
-ol_backend_x11_init(struct ol_backend_video_s* self)
+int
+ol_backend_video_x11_init(struct ol_backend_video_s* self)
 {
   int ret = 0;
 
@@ -104,16 +104,16 @@ ol_backend_x11_init(struct ol_backend_video_s* self)
   return ret;
 }
 
-static void
-ol_backend_x11_uninit(struct ol_backend_video_s* self)
+void
+ol_backend_video_x11_uninit(struct ol_backend_video_s* self)
 {
   XCloseDisplay(OL_BACKEND_DATA()->display);
   free(self->data);
 }
 
 
-static void
-ol_backend_x11_get_gamma(struct ol_backend_video_s* self,
+void
+ol_backend_video_x11_get_gamma(struct ol_backend_video_s* self,
                           struct ol_gamma_s gamma)
 {
   XF86VidModeGetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
@@ -121,8 +121,8 @@ ol_backend_x11_get_gamma(struct ol_backend_video_s* self,
                           gamma.red, gamma.green, gamma.blue);
 }
 
-static void
-ol_backend_x11_set_gamma(struct ol_backend_video_s* self,
+void
+ol_backend_video_x11_set_gamma(struct ol_backend_video_s* self,
                           struct ol_gamma_s gamma)
 {
   XF86VidModeSetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
@@ -135,8 +135,8 @@ struct ol_backend_video_s ol_backend_video_x11 =
   .data = NULL,
   .gamma_ramp_size = 0,
 
-  .init = ol_backend_x11_init,
-  .uninit = ol_backend_x11_uninit,
-  .get_gamma = ol_backend_x11_get_gamma,
-  .set_gamma = ol_backend_x11_set_gamma
+  .init = ol_backend_video_x11_init,
+  .uninit = ol_backend_video_x11_uninit,
+  .get_gamma = ol_backend_video_x11_get_gamma,
+  .set_gamma = ol_backend_video_x11_set_gamma
 };
