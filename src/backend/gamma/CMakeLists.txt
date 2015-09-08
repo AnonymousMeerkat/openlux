@@ -1,5 +1,6 @@
 set(SOURCES
   absolute.c
+  relative.c
   gamma.c
   )
 

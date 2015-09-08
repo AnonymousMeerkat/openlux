@@ -31,7 +31,9 @@ struct ol_backend_video_s
 {
   void* data;
   int gamma_ramp_size;
+
   int gamma_index;
+  void* gamma_data;
 
   int (*init)(struct ol_backend_video_s* self);
   void (*uninit)(struct ol_backend_video_s* self);
@@ -47,7 +49,8 @@ struct ol_backend_video_s
 
 #define OL_BACKEND_VIDEO_INDEX_X11 0
 
-int ol_backend_video_init(struct ol_backend_video_s* self, int index);
+int ol_backend_video_init(struct ol_backend_video_s* self, int index,
+                          void* data);
 
 
 #endif

@@ -161,13 +161,13 @@ main(int argc, char** argv)
 
   /*** Load backends ***/
 
-  if (ol_backend_os_init(&os_backend, -1))
+  if (ol_backend_os_init(&os_backend, -1, NULL))
     {
       OL_LOG_ERR("Unable to load platform backend");
       return 2;
     }
 
-  if (ol_backend_video_init(&video_backend, -1))
+  if (ol_backend_video_init(&video_backend, -1, NULL))
     {
       OL_LOG_ERR("Unable to load video backend");
 
@@ -175,7 +175,8 @@ main(int argc, char** argv)
       goto free_os_backend;
     }
 
-  if (ol_backend_gamma_init(&gamma_backend, video_backend.gamma_index))
+  if (ol_backend_gamma_init(&gamma_backend, video_backend.gamma_index,
+                            video_backend.gamma_data))
     {
       OL_LOG_ERR("Unable to load gamma backend");
 

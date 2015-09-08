@@ -35,7 +35,8 @@ OL_BACKEND_LIST() =
 
 
 int
-ol_backend_video_init(struct ol_backend_video_s* self, int index)
+ol_backend_video_init(struct ol_backend_video_s* self, int index,
+                      void* data)
 {
   int ret;
 
