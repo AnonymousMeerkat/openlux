@@ -5,7 +5,6 @@ set(
 
   color.c
   kelvin.c
-  gamma.c
   main.c
   )
 

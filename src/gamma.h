@@ -52,12 +52,4 @@ struct ol_gamma_s
   }
 
 
-void
-ol_gamma_rgb(unsigned int color, int gamma_ramp_size,
-             struct ol_gamma_s gamma);
-
-void
-ol_gamma_identity(int gamma_ramp_size, struct ol_gamma_s gamma);
-
-
 #endif
