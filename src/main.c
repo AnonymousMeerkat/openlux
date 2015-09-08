@@ -225,11 +225,14 @@ main(int argc, char** argv)
                                            OL_COLOR_BLUE(color))
                             );
 
-      ol_gamma_rgb(color, video_backend.gamma_ramp_size, gamma_value);
+      gamma_backend.rgb(&gamma_backend,
+                        video_backend.gamma_ramp_size,
+                        color, gamma_value);
     }
   else
     {
-      ol_gamma_identity(video_backend.gamma_ramp_size, gamma_value);
+      gamma_backend.identity(&gamma_backend,
+                             video_backend.gamma_ramp_size, gamma_value);
     }
 
   /*** Set gamma ***/
