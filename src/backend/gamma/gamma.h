@@ -20,16 +20,35 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_UTIL_H
-#define _OPENLUX_UTIL_H
+#ifndef _OPENLUX_BACKEND_GAMMA_H
+#define _OPENLUX_BACKEND_GAMMA_H
 
 
-#define OL_UTIL_CAT_RAW(x, y) x ## y
-#define OL_UTIL_CAT(x, y) OL_UTIL_CAT_RAW(x, y)
-#define OL_UTIL_STR_RAW(x) #x
-#define OL_UTIL_STR(x) OL_UTIL_STR(x)
+#include "../../color.h"
+#include "../../gamma.h"
 
-#define OL_UTIL_UNUSED(x) (void)(x)
+
+struct ol_backend_gamma_s;
+struct ol_backend_gamma_s
+{
+  void* data;
+
+  int (*init)(struct ol_backend_gamma_s* self);
+  void (*uninit)(struct ol_backend_gamma_s* self);
+
+
+  void (*rgb)(struct ol_backend_gamma_s* self,
+              int gamma_ramp_size,
+              ol_color_t color, struct ol_gamma_s gamma);
+
+  void (*identity)(struct ol_backend_gamma_s* self,
+              int gamma_ramp_size, struct ol_gamma_s gamma);
+};
+
+
+#define OL_BACKEND_GAMMA_INDEX_ABSOLUTE 0
+
+int ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index);
 
 
 #endif

@@ -20,16 +20,27 @@
   THE SOFTWARE.
 */
 
-#ifndef _OPENLUX_UTIL_H
-#define _OPENLUX_UTIL_H
+#include "gamma.h"
 
 
-#define OL_UTIL_CAT_RAW(x, y) x ## y
-#define OL_UTIL_CAT(x, y) OL_UTIL_CAT_RAW(x, y)
-#define OL_UTIL_STR_RAW(x) #x
-#define OL_UTIL_STR(x) OL_UTIL_STR(x)
-
-#define OL_UTIL_UNUSED(x) (void)(x)
+#define OL_BACKEND_PREFIX gamma
+#include "../backend.h"
 
 
-#endif
+OL_BACKEND_INIT(absolute);
+OL_BACKEND_LIST() =
+{
+  OL_BACKEND_LIST_ITEM(absolute),
+  OL_BACKEND_LIST_END()
+};
+
+
+int
+ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index)
+{
+  int ret;
+
+  OL_BACKEND_FIND(ret);
+
+  return ret;
+}

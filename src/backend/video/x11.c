@@ -30,6 +30,8 @@
 #define OL_BACKEND_PREFIX video_x11
 #include "../backend.h"
 
+#include "../gamma/gamma.h"
+
 
 struct ol_backend_video_x11_data_s
 {
@@ -134,6 +136,7 @@ struct ol_backend_video_s ol_backend_video_x11 =
 {
   .data = NULL,
   .gamma_ramp_size = 0,
+  .gamma_index = OL_BACKEND_GAMMA_INDEX_ABSOLUTE,
 
   .init = ol_backend_video_x11_init,
   .uninit = ol_backend_video_x11_uninit,

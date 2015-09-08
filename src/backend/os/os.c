@@ -26,6 +26,7 @@
 #define OL_BACKEND_PREFIX os
 #include "../backend.h"
 
+
 OL_BACKEND_INIT(posix);
 OL_BACKEND_LIST() =
 {
@@ -35,7 +36,7 @@ OL_BACKEND_LIST() =
 
 
 int
-ol_backend_os_init(struct ol_backend_os_s* self)
+ol_backend_os_init(struct ol_backend_os_s* self, int index)
 {
   int ret;
 

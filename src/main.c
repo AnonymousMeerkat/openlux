@@ -27,8 +27,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "backend/video/video.h"
 #include "backend/os/os.h"
+#include "backend/video/video.h"
+#include "backend/gamma/gamma.h"
 #include "log.h"
 #include "color.h"
 #include "gamma.h"
@@ -94,10 +95,11 @@ main(int argc, char** argv)
   int c;
   int option_index;
 
-  struct ol_backend_video_s video;
-  struct ol_backend_os_s os;
+  struct ol_backend_os_s os_backend;
+  struct ol_backend_video_s video_backend;
+  struct ol_backend_gamma_s gamma_backend;
 
-  struct ol_gamma_s gamma;
+  struct ol_gamma_s gamma_value;
   FILE* gamma_file;
 
   /*** Parse arguments ***/
@@ -159,32 +161,40 @@ main(int argc, char** argv)
 
   /*** Load backends ***/
 
-  if (ol_backend_os_init(&os))
+  if (ol_backend_os_init(&os_backend, -1))
     {
       OL_LOG_ERR("Unable to load platform backend");
       return 2;
     }
 
-  if (ol_backend_video_init(&video))
+  if (ol_backend_video_init(&video_backend, -1))
     {
       OL_LOG_ERR("Unable to load video backend");
 
       ret = 3;
-      goto free_os;
+      goto free_os_backend;
+    }
+
+  if (ol_backend_gamma_init(&gamma_backend, video_backend.gamma_index))
+    {
+      OL_LOG_ERR("Unable to load gamma backend");
+
+      ret = 4;
+      goto free_video_backend;
     }
 
 
 
-  OL_GAMMA_MALLOC(video.gamma_ramp_size, gamma);
+  OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, gamma_value);
 
-  if (!os.exists(&os, "gamma") || opt_save)
+  if (!os_backend.exists(&os_backend, "gamma") || opt_save)
     {
       /* Save gamma */
-      video.get_gamma(&video, gamma);
+      video_backend.get_gamma(&video_backend, gamma_value);
 
-      gamma_file = os.open(&os, "gamma", "wb");
-      fwrite(gamma.red,
-             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video.gamma_ramp_size),
+      gamma_file = os_backend.open(&os_backend, "gamma", "wb");
+      fwrite(gamma_value.red,
+             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
              gamma_file);
       fclose(gamma_file);
 
@@ -196,9 +206,9 @@ main(int argc, char** argv)
   /*** Load gamma ***/
   if (opt_reset)
     {
-      gamma_file = os.open(&os, "gamma", "rb");
-      fread(gamma.red,
-             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video.gamma_ramp_size),
+      gamma_file = os_backend.open(&os_backend, "gamma", "rb");
+      fread(gamma_value.red,
+             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
              gamma_file);
       fclose(gamma_file);
     }
@@ -215,26 +225,28 @@ main(int argc, char** argv)
                                            OL_COLOR_BLUE(color))
                             );
 
-      ol_gamma_rgb(color, video.gamma_ramp_size, gamma);
+      ol_gamma_rgb(color, video_backend.gamma_ramp_size, gamma_value);
     }
   else
     {
-      ol_gamma_identity(video.gamma_ramp_size, gamma);
+      ol_gamma_identity(video_backend.gamma_ramp_size, gamma_value);
     }
 
   /*** Set gamma ***/
-  video.set_gamma(&video, gamma);
+  video_backend.set_gamma(&video_backend, gamma_value);
 
 
   /*** End ***/
  start_end:
- free_gamma:
-  OL_GAMMA_FREE(gamma);
+ free_gamma_value:
+  OL_GAMMA_FREE(gamma_value);
 
- free_video:
-  video.uninit(&video);
- free_os:
-  os.uninit(&os);
+ free_gamma_backend:
+  gamma_backend.uninit(&gamma_backend);
+ free_video_backend:
+  video_backend.uninit(&video_backend);
+ free_os_backend:
+  os_backend.uninit(&os_backend);
 
  end:
   return ret;
