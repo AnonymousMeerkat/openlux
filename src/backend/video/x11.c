@@ -136,7 +136,9 @@ struct ol_backend_video_s ol_backend_video_x11 =
 {
   .data = NULL,
   .gamma_ramp_size = 0,
+
   .gamma_index = OL_BACKEND_GAMMA_INDEX_ABSOLUTE,
+  .gamma_data = NULL,
 
   .init = ol_backend_video_x11_init,
   .uninit = ol_backend_video_x11_uninit,

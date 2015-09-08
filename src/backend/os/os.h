@@ -44,7 +44,8 @@ struct ol_backend_os_s
 
 #define OL_BACKEND_OS_INDEX_POSIX 0
 
-int ol_backend_os_init(struct ol_backend_os_s* self, int index);
+int ol_backend_os_init(struct ol_backend_os_s* self, int index,
+                       void* data);
 
 
 #endif

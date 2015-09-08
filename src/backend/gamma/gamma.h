@@ -47,8 +47,10 @@ struct ol_backend_gamma_s
 
 
 #define OL_BACKEND_GAMMA_INDEX_ABSOLUTE 0
+#define OL_BACKEND_GAMMA_INDEX_RELATIVE 1
 
-int ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index);
+int ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index,
+                          void* data);
 
 
 #endif

@@ -36,7 +36,8 @@ OL_BACKEND_LIST() =
 
 
 int
-ol_backend_os_init(struct ol_backend_os_s* self, int index)
+ol_backend_os_init(struct ol_backend_os_s* self, int index,
+                   void* data)
 {
   int ret;
 

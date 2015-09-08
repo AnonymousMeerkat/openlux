@@ -28,15 +28,18 @@
 
 
 OL_BACKEND_INIT(absolute);
+OL_BACKEND_INIT(relative);
 OL_BACKEND_LIST() =
 {
   OL_BACKEND_LIST_ITEM(absolute),
+  OL_BACKEND_LIST_ITEM(relative),
   OL_BACKEND_LIST_END()
 };
 
 
 int
-ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index)
+ol_backend_gamma_init(struct ol_backend_gamma_s* self, int index,
+                      void* data)
 {
   int ret;
 

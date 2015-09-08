@@ -48,9 +48,10 @@
     _OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST();                 \
     if (index >= 0)                                                     \
       i += index;                                                       \
-    for (_OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST(); i; i++)    \
+    for (; i; i++)                                                      \
       {                                                                 \
         *self = **i;                                                    \
+        self->data = data;                                              \
         (ret) = (*i)->init(self);                                       \
         if (!(ret) || index >= 0)                                       \
           {                                                             \
