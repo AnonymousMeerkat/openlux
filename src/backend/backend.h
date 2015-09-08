@@ -45,11 +45,14 @@
 
 #define OL_BACKEND_FIND(ret)                                            \
   {                                                                     \
-    for (_OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST();;i++)        \
+    _OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST();                 \
+    if (index >= 0)                                                     \
+      i += index;                                                       \
+    for (_OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST(); i; i++)    \
       {                                                                 \
         *self = **i;                                                    \
         (ret) = (*i)->init(self);                                       \
-        if (!(ret))                                                     \
+        if (!(ret) || index >= 0)                                       \
           {                                                             \
             break;                                                      \
           }                                                             \

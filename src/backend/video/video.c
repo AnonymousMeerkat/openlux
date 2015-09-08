@@ -25,6 +25,7 @@
 #define OL_BACKEND_PREFIX video
 #include "../backend.h"
 
+
 OL_BACKEND_INIT(x11);
 OL_BACKEND_LIST() =
 {
@@ -34,7 +35,7 @@ OL_BACKEND_LIST() =
 
 
 int
-ol_backend_video_init(struct ol_backend_video_s* self)
+ol_backend_video_init(struct ol_backend_video_s* self, int index)
 {
   int ret;
 

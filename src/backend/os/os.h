@@ -41,7 +41,10 @@ struct ol_backend_os_s
   int (*exists)(struct ol_backend_os_s* self, char* name);
 };
 
-int ol_backend_os_init(struct ol_backend_os_s* self);
+
+#define OL_BACKEND_OS_INDEX_POSIX 0
+
+int ol_backend_os_init(struct ol_backend_os_s* self, int index);
 
 
 #endif

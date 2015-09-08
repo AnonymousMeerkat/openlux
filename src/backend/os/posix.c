@@ -129,7 +129,8 @@ ol_backend_os_posix_exists(struct ol_backend_os_s* self, char* name)
 }
 
 
-struct ol_backend_os_s ol_backend_os_posix =
+struct ol_backend_os_s
+ol_backend_os_posix =
   {
     .data = NULL,
 
