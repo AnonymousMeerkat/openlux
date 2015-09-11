@@ -3,6 +3,7 @@ add_subdirectory(backend)
 set(
   SOURCES
 
+  animate.c
   color.c
   kelvin.c
   main.c
