@@ -48,6 +48,7 @@ struct ol_backend_video_s
 
 
 #define OL_BACKEND_VIDEO_INDEX_X11 0
+#define OL_BACKEND_VIDEO_INDEX_IOS 1
 
 int ol_backend_video_init(struct ol_backend_video_s* self, int index,
                           void* data);

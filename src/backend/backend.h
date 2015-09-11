@@ -41,22 +41,24 @@
 #define OL_BACKEND_LIST() static _OL_BACKEND_STRUCT()* _OL_BACKEND_NAME_LIST()[]
   ; /* emacs */
 #define OL_BACKEND_LIST_ITEM(sub) &_OL_BACKEND_NAME_SUBPREFIX(sub)
+#define OL_BACKEND_LIST_FAIL() ((_OL_BACKEND_STRUCT()*)1)
 #define OL_BACKEND_LIST_END() 0
 
 #define OL_BACKEND_FIND(ret)                                            \
   {                                                                     \
+    ret = -2;                                                           \
     _OL_BACKEND_STRUCT()** i = _OL_BACKEND_NAME_LIST();                 \
     if (index >= 0)                                                     \
       i += index;                                                       \
-    for (; i; i++)                                                      \
+    for (; *i; i++)                                                     \
       {                                                                 \
+        if (*i == OL_BACKEND_LIST_FAIL())                               \
+          continue;                                                     \
         *self = **i;                                                    \
         self->data = data;                                              \
         (ret) = (*i)->init(self);                                       \
         if (!(ret) || index >= 0)                                       \
-          {                                                             \
-            break;                                                      \
-          }                                                             \
+          break;                                                        \
       }                                                                 \
   }
 

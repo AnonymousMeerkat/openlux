@@ -31,6 +31,7 @@
     fputs("[" head "] ", stream);               \
     fprintf(stream, __VA_ARGS__);               \
     fputs("\n", stream);                        \
+    fflush(stdout);                             \
   }
 
 #define OL_LOG_INFO(...)                                \

@@ -44,6 +44,14 @@ ol_backend_gamma_absolute_uninit(struct ol_backend_gamma_s* self)
 
 
 void
+ol_backend_gamma_absolute_set_default_gamma(struct ol_backend_gamma_s* self,
+                                            struct ol_gamma_s gamma)
+{
+  OL_UTIL_UNUSED(self);
+  OL_UTIL_UNUSED(gamma);
+}
+
+void
 ol_backend_gamma_absolute_rgb(struct ol_backend_gamma_s* self,
                               int gamma_ramp_size,
                               ol_color_t color, struct ol_gamma_s gamma)
@@ -100,10 +108,13 @@ ol_backend_gamma_absolute_identity(struct ol_backend_gamma_s* self,
 
 struct ol_backend_gamma_s ol_backend_gamma_absolute =
   {
-    .data = NULL,
+    .data                = NULL,
+    .needs_default_gamma = 0,
 
-    .init     = ol_backend_gamma_absolute_init,
-    .uninit   = ol_backend_gamma_absolute_uninit,
-    .rgb      = ol_backend_gamma_absolute_rgb,
-    .identity = ol_backend_gamma_absolute_identity
+    .init                = ol_backend_gamma_absolute_init,
+    .uninit              = ol_backend_gamma_absolute_uninit,
+
+    .set_default_gamma   = ol_backend_gamma_absolute_set_default_gamma,
+    .rgb                 = ol_backend_gamma_absolute_rgb,
+    .identity            = ol_backend_gamma_absolute_identity
   };

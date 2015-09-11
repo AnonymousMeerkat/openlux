@@ -27,22 +27,28 @@
 #include "../../color.h"
 #include "../../gamma.h"
 
+#include <stdbool.h>
+
 
 struct ol_backend_gamma_s;
 struct ol_backend_gamma_s
 {
   void* data;
+  bool needs_default_gamma;
 
   int (*init)(struct ol_backend_gamma_s* self);
   void (*uninit)(struct ol_backend_gamma_s* self);
 
+
+  void (*set_default_gamma)(struct ol_backend_gamma_s* self,
+                            struct ol_gamma_s gamma);
 
   void (*rgb)(struct ol_backend_gamma_s* self,
               int gamma_ramp_size,
               ol_color_t color, struct ol_gamma_s gamma);
 
   void (*identity)(struct ol_backend_gamma_s* self,
-              int gamma_ramp_size, struct ol_gamma_s gamma);
+                   int gamma_ramp_size, struct ol_gamma_s gamma);
 };
 
 

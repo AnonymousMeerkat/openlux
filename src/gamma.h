@@ -27,7 +27,11 @@
 #include <stdlib.h>
 
 
+#ifdef OL_USE_IOS
+typedef uint32_t ol_gamma_t;
+#else
 typedef unsigned short ol_gamma_t;
+#endif
 
 struct ol_gamma_s
 {
@@ -48,7 +52,11 @@ struct ol_gamma_s
 
 #define OL_GAMMA_FREE(gamma)                    \
   {                                             \
-    free((gamma).red);                          \
+    if ((gamma).red)                            \
+      {                                         \
+        free((gamma).red);                      \
+        (gamma).red = NULL;                     \
+      }                                         \
   }
 
 
