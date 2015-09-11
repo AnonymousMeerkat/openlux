@@ -25,6 +25,9 @@
 #include "../../util.h"
 #include "../../log.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 #define OL_BACKEND_PREFIX gamma_relative
 #include "../backend.h"
 
@@ -42,9 +45,18 @@ ol_backend_gamma_relative_init(struct ol_backend_gamma_s* self)
 void
 ol_backend_gamma_relative_uninit(struct ol_backend_gamma_s* self)
 {
-  OL_UTIL_UNUSED(self);
+  if (self->data)
+    free(self->data);
 }
 
+
+void
+ol_backend_gamma_relative_set_default_gamma(struct ol_backend_gamma_s* self,
+                                            struct ol_gamma_s gamma)
+{
+  self->data = malloc(sizeof(struct ol_gamma_s));
+  memcpy(self->data, &gamma, sizeof(struct ol_gamma_s));
+}
 
 /* FIXME: Doesn't use gamma_ramp_size */
 void
@@ -65,12 +77,7 @@ ol_backend_gamma_relative_rgb(struct ol_backend_gamma_s* self,
       {                                                                 \
         color_div = col##c >> 8;                                        \
         color_mod = col##c & 0xff;                                      \
-        gamma.col[j] =                                                  \
-          OL_BACKEND_DATA()->col[color_div] +                           \
-          (((OL_BACKEND_DATA()->col[color_div + 1] -                    \
-             OL_BACKEND_DATA()->col[color_div])                         \
-            * color_mod)                                                \
-           >> 8);                                                       \
+        gamma.col[j] = OL_BACKEND_DATA()->col[color_div];               \
       }
 
       do_color(red);
@@ -97,10 +104,13 @@ ol_backend_gamma_relative_identity(struct ol_backend_gamma_s* self,
 
 struct ol_backend_gamma_s ol_backend_gamma_relative =
   {
-    .data = NULL,
+    .data                = NULL,
+    .needs_default_gamma = 1,
 
-    .init     = ol_backend_gamma_relative_init,
-    .uninit   = ol_backend_gamma_relative_uninit,
-    .rgb      = ol_backend_gamma_relative_rgb,
-    .identity = ol_backend_gamma_relative_identity
+    .init                = ol_backend_gamma_relative_init,
+    .uninit              = ol_backend_gamma_relative_uninit,
+
+    .set_default_gamma   = ol_backend_gamma_relative_set_default_gamma,
+    .rgb                 = ol_backend_gamma_relative_rgb,
+    .identity            = ol_backend_gamma_relative_identity
   };

@@ -116,7 +116,7 @@ ol_backend_video_x11_uninit(struct ol_backend_video_s* self)
 
 void
 ol_backend_video_x11_get_gamma(struct ol_backend_video_s* self,
-                          struct ol_gamma_s gamma)
+                               struct ol_gamma_s gamma)
 {
   XF86VidModeGetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
                           self->gamma_ramp_size,
@@ -125,23 +125,24 @@ ol_backend_video_x11_get_gamma(struct ol_backend_video_s* self,
 
 void
 ol_backend_video_x11_set_gamma(struct ol_backend_video_s* self,
-                          struct ol_gamma_s gamma)
+                               struct ol_gamma_s gamma)
 {
   XF86VidModeSetGammaRamp(OL_BACKEND_DATA()->display, OL_BACKEND_DATA()->screen,
                           self->gamma_ramp_size,
                           gamma.red, gamma.green, gamma.blue);
 }
 
+
 struct ol_backend_video_s ol_backend_video_x11 =
-{
-  .data = NULL,
-  .gamma_ramp_size = 0,
+  {
+    .data            = NULL,
+    .gamma_ramp_size = 0,
 
-  .gamma_index = OL_BACKEND_GAMMA_INDEX_ABSOLUTE,
-  .gamma_data = NULL,
+    .gamma_index     = OL_BACKEND_GAMMA_INDEX_ABSOLUTE,
+    .gamma_data      = NULL,
 
-  .init = ol_backend_video_x11_init,
-  .uninit = ol_backend_video_x11_uninit,
-  .get_gamma = ol_backend_video_x11_get_gamma,
-  .set_gamma = ol_backend_video_x11_set_gamma
-};
+    .init            = ol_backend_video_x11_init,
+    .uninit          = ol_backend_video_x11_uninit,
+    .get_gamma       = ol_backend_video_x11_get_gamma,
+    .set_gamma       = ol_backend_video_x11_set_gamma
+  };

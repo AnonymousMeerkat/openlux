@@ -99,8 +99,10 @@ main(int argc, char** argv)
   struct ol_backend_video_s video_backend;
   struct ol_backend_gamma_s gamma_backend;
 
+  struct ol_gamma_s default_gamma_value;
   struct ol_gamma_s gamma_value;
   FILE* gamma_file;
+
 
   /*** Parse arguments ***/
 
@@ -185,7 +187,6 @@ main(int argc, char** argv)
     }
 
 
-
   OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, gamma_value);
 
   if (!os_backend.exists(&os_backend, "gamma") || opt_save)
@@ -200,18 +201,32 @@ main(int argc, char** argv)
       fclose(gamma_file);
 
       if (opt_save)
-        goto start_end;
+        goto free_gamma_value;
+    }
+
+
+  /*** Load default gamma ***/
+
+  if (gamma_backend.needs_default_gamma || opt_reset)
+    {
+      OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, default_gamma_value);
+
+      gamma_file = os_backend.open(&os_backend, "gamma", "rb");
+      fread(default_gamma_value.red,
+            sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
+            gamma_file);
+      fclose(gamma_file);
+
+      gamma_backend.set_default_gamma(&gamma_backend, default_gamma_value);
     }
 
 
   /*** Load gamma ***/
+
   if (opt_reset)
     {
-      gamma_file = os_backend.open(&os_backend, "gamma", "rb");
-      fread(gamma_value.red,
-             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
-             gamma_file);
-      fclose(gamma_file);
+      OL_GAMMA_FREE(gamma_value);
+      gamma_value = default_gamma_value;
     }
   else if (!opt_identity)
     {
@@ -236,19 +251,29 @@ main(int argc, char** argv)
                              video_backend.gamma_ramp_size, gamma_value);
     }
 
+
   /*** Set gamma ***/
+
   video_backend.set_gamma(&video_backend, gamma_value);
 
 
   /*** End ***/
+
  start_end:
+ free_default_gamma_value:
+
+  if (gamma_backend.needs_default_gamma && !opt_reset)
+    OL_GAMMA_FREE(default_gamma_value);
+
  free_gamma_value:
   OL_GAMMA_FREE(gamma_value);
 
  free_gamma_backend:
   gamma_backend.uninit(&gamma_backend);
+
  free_video_backend:
   video_backend.uninit(&video_backend);
+
  free_os_backend:
   os_backend.uninit(&os_backend);
 

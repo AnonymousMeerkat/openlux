@@ -27,9 +27,21 @@
 
 
 OL_BACKEND_INIT(x11);
+OL_BACKEND_INIT(ios);
 OL_BACKEND_LIST() =
 {
+#ifdef OL_USE_X11
   OL_BACKEND_LIST_ITEM(x11),
+#else
+  OL_BACKEND_LIST_FAIL(),
+#endif
+
+#ifdef OL_USE_IOS
+  OL_BACKEND_LIST_ITEM(ios),
+#else
+  OL_BACKEND_LIST_FAIL(),
+#endif
+
   OL_BACKEND_LIST_END()
 };
 
