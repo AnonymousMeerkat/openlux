@@ -24,6 +24,7 @@
 #define _OL_GAMMA_H
 
 
+#include <string.h>
 #include <stdlib.h>
 
 
@@ -43,11 +44,16 @@ struct ol_gamma_s
 #define OL_GAMMA_ELEMENTS(size) ((size) * 3)
 #define OL_GAMMA_SIZE(size) (OL_GAMMA_ELEMENTS(size) * sizeof(ol_gamma_t))
 
+#define _OL_GAMMA_INIT(size, gamma)             \
+  {                                             \
+    (gamma).green = (gamma).red + (size);       \
+    (gamma).blue = (gamma).green + (size);      \
+  }
+
 #define OL_GAMMA_MALLOC(size, gamma)            \
   {                                             \
     (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    (gamma).green = (gamma).red + (size);       \
-    (gamma).blue = (gamma).green + (size);      \
+    _OL_GAMMA_INIT(size, gamma);                \
   }
 
 #define OL_GAMMA_FREE(gamma)                    \
@@ -57,6 +63,12 @@ struct ol_gamma_s
         free((gamma).red);                      \
         (gamma).red = NULL;                     \
       }                                         \
+  }
+
+#define OL_GAMMA_COPY(dest, src, size)                  \
+  {                                                     \
+    memcpy((dest).red, (src).red, OL_GAMMA_SIZE(size)); \
+    _OL_GAMMA_INIT(size, dest);                         \
   }
 
 

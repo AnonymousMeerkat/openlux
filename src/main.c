@@ -30,6 +30,7 @@
 #include "backend/os/os.h"
 #include "backend/video/video.h"
 #include "backend/gamma/gamma.h"
+#include "animate.h"
 #include "log.h"
 #include "color.h"
 #include "gamma.h"
@@ -53,14 +54,18 @@ ol_main_help(char* argv0)
   puts("Adjusts screen color temperature");
   puts("");
   puts("Options:");
-  puts(" -k, --kelvin        color temperature in kelvin (1000-40000, default: 3400)");
+  puts(" -k, --kelvin        color temperature in kelvin (1000-40000,");
+  puts("                         default: 3400)");
   puts(" -r, --red           red color channel (0-255, default: auto)");
   puts(" -g, --green         green color channel (0-255, default: auto)");
   puts(" -b, --blue          blue color channel (0-255, default: auto)");
   puts(" -i, --identity      sets display gamma to identity");
   puts(" -R, --reset         resets display gamma to last saved gamma");
-  puts(" -s, --save          saves current gamma (automatically done when openlux");
-  puts("                         is run for the first time on boot)");
+  puts(" -s, --save          saves current gamma (automatically done when");
+  puts("                         openlux is run for the first time on boot)");
+  puts(" -a, --animate       animation time in milliseconds (default: 0)");
+  puts(" -d, --delay         animation delay per \"frame\" in milliseconds");
+  puts("                         (default: 0)");
   puts("");
   puts(" -h, --help          display this help and exit");
   puts(" -V, --version       display version information and exit");
@@ -74,6 +79,8 @@ static struct option _ol_main_long_options[] = {
   {"identity", no_argument,       0, 'i'},
   {"reset",    no_argument,       0, 'R'},
   {"save",     no_argument,       0, 's'},
+  {"animate",  required_argument, 0, 'a'},
+  {"delay",    required_argument, 0, 'd'},
   {"help",     no_argument,       0, 'h'},
   {"version",  no_argument,       0, 'V'},
   {0, 0, 0, 0}
@@ -91,6 +98,8 @@ main(int argc, char** argv)
   bool opt_identity = 0;
   bool opt_save = 0;
   bool opt_reset = 0;
+  int opt_anim = 0;
+  int opt_delay = 0;
 
   int c;
   int option_index;
@@ -100,15 +109,20 @@ main(int argc, char** argv)
   struct ol_backend_gamma_s gamma_backend;
 
   struct ol_gamma_s default_gamma_value;
+  struct ol_gamma_s current_gamma_value;
+  struct ol_gamma_s anim_gamma_value;
   struct ol_gamma_s gamma_value;
   FILE* gamma_file;
+
+  ol_time_t start_time;
+  ol_time_t current_time;
 
 
   /*** Parse arguments ***/
 
   while (1)
     {
-      c = getopt_long(argc, argv, "hVk:r:g:b:iRs", _ol_main_long_options,
+      c = getopt_long(argc, argv, "hVk:r:g:b:iRsa:d:", _ol_main_long_options,
                       &option_index);
       if (c == -1)
         break;
@@ -154,6 +168,14 @@ main(int argc, char** argv)
           strcpy(opt_blue, optarg);
           break;
 
+        case 'a':
+          opt_anim = atoi(optarg);
+          break;
+
+        case 'd':
+          opt_delay = atoi(optarg);
+          break;
+
         default:
           ol_main_help(argv[0]);
           return 1;
@@ -187,21 +209,20 @@ main(int argc, char** argv)
     }
 
 
-  OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, gamma_value);
+  OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, current_gamma_value);
+  video_backend.get_gamma(&video_backend, current_gamma_value);
 
   if (!os_backend.exists(&os_backend, "gamma") || opt_save)
     {
       /* Save gamma */
-      video_backend.get_gamma(&video_backend, gamma_value);
-
       gamma_file = os_backend.open(&os_backend, "gamma", "wb");
-      fwrite(gamma_value.red,
+      fwrite(current_gamma_value.red,
              sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
              gamma_file);
       fclose(gamma_file);
 
       if (opt_save)
-        goto free_gamma_value;
+        goto free_current_gamma_value;
     }
 
 
@@ -220,13 +241,14 @@ main(int argc, char** argv)
       gamma_backend.set_default_gamma(&gamma_backend, default_gamma_value);
     }
 
+  OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, gamma_value);
 
   /*** Load gamma ***/
 
   if (opt_reset)
     {
-      OL_GAMMA_FREE(gamma_value);
-      gamma_value = default_gamma_value;
+      OL_GAMMA_COPY(gamma_value, default_gamma_value,
+                    video_backend.gamma_ramp_size);
     }
   else if (!opt_identity)
     {
@@ -254,6 +276,30 @@ main(int argc, char** argv)
 
   /*** Set gamma ***/
 
+  if (opt_anim > 0)
+    {
+      /* Animate it */
+
+      OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, anim_gamma_value);
+
+      start_time = ol_animate_gettime(0);
+
+      for (current_time = ol_animate_gettime(start_time);
+           current_time < opt_anim;
+           current_time = ol_animate_gettime(start_time))
+        {
+          ol_animate_lerp(current_gamma_value, gamma_value, anim_gamma_value,
+                          video_backend.gamma_ramp_size,
+                          current_time, opt_anim);
+          video_backend.set_gamma(&video_backend, anim_gamma_value);
+
+          ol_animate_sleep(opt_delay);
+        }
+
+      OL_GAMMA_FREE(anim_gamma_value);
+    }
+
+  /* Set gamma */
   video_backend.set_gamma(&video_backend, gamma_value);
 
 
@@ -262,11 +308,14 @@ main(int argc, char** argv)
  start_end:
  free_default_gamma_value:
 
-  if (gamma_backend.needs_default_gamma && !opt_reset)
+  if (gamma_backend.needs_default_gamma || opt_reset)
     OL_GAMMA_FREE(default_gamma_value);
 
  free_gamma_value:
   OL_GAMMA_FREE(gamma_value);
+
+ free_current_gamma_value:
+  OL_GAMMA_FREE(current_gamma_value);
 
  free_gamma_backend:
   gamma_backend.uninit(&gamma_backend);
