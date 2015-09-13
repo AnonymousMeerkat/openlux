@@ -70,7 +70,7 @@ else ()
   if (HAS_X11 AND USE_X11)
     message("Building with X11 support")
     set(BUILD_X11 on)
-    add_definitions("-DOL_CMAKE_USE_X11")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lX11")
   endif ()
 
 endif ()
