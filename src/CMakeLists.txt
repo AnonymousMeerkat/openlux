@@ -13,7 +13,7 @@ add_executable(openlux ${SOURCES})
 target_link_libraries(
   openlux
 
-  m ${X11_LIBRARIES} ${XF86VM_LIBRARIES}
+  m ${X11_X11_LIB} ${X11_Xxf86vm_LIB}
   ol_backend_os ol_backend_video ol_backend_gamma ol_backend_time
   )
 
