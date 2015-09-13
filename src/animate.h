@@ -25,13 +25,9 @@
 
 
 #include "gamma.h"
+#include "backend/time/time.h"
 #include <stdint.h>
 
-
-typedef int64_t ol_time_t;
-
-ol_time_t ol_animate_gettime(ol_time_t start_time);
-void ol_animate_sleep(ol_time_t time);
 
 void ol_animate_lerp(struct ol_gamma_s current,
                        struct ol_gamma_s new,

@@ -30,6 +30,7 @@
 #include "backend/os/os.h"
 #include "backend/video/video.h"
 #include "backend/gamma/gamma.h"
+#include "backend/time/time.h"
 #include "animate.h"
 #include "log.h"
 #include "color.h"
@@ -107,6 +108,7 @@ main(int argc, char** argv)
   struct ol_backend_os_s os_backend;
   struct ol_backend_video_s video_backend;
   struct ol_backend_gamma_s gamma_backend;
+  struct ol_backend_time_s time_backend;
 
   struct ol_gamma_s default_gamma_value;
   struct ol_gamma_s current_gamma_value;
@@ -208,6 +210,13 @@ main(int argc, char** argv)
       goto free_video_backend;
     }
 
+  if (ol_backend_time_init(&time_backend, os_backend.time_index, NULL))
+    {
+      OL_LOG_ERR("Unable to load time backend");
+      ret = 5;
+      goto free_gamma_backend;
+    }
+
 
   OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, current_gamma_value);
   video_backend.get_gamma(&video_backend, current_gamma_value);
@@ -217,7 +226,7 @@ main(int argc, char** argv)
       /* Save gamma */
       gamma_file = os_backend.open(&os_backend, "gamma", "wb");
       fwrite(current_gamma_value.red,
-             sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
+             1, OL_GAMMA_SIZE(video_backend.gamma_ramp_size),
              gamma_file);
       fclose(gamma_file);
 
@@ -234,7 +243,7 @@ main(int argc, char** argv)
 
       gamma_file = os_backend.open(&os_backend, "gamma", "rb");
       fread(default_gamma_value.red,
-            sizeof(ol_gamma_t), OL_GAMMA_ELEMENTS(video_backend.gamma_ramp_size),
+            1, OL_GAMMA_SIZE(video_backend.gamma_ramp_size),
             gamma_file);
       fclose(gamma_file);
 
@@ -282,18 +291,18 @@ main(int argc, char** argv)
 
       OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, anim_gamma_value);
 
-      start_time = ol_animate_gettime(0);
+      start_time = time_backend.get_time(&time_backend);
 
-      for (current_time = ol_animate_gettime(start_time);
+      for (current_time = time_backend.get_time(&time_backend) - start_time;
            current_time < opt_anim;
-           current_time = ol_animate_gettime(start_time))
+           current_time = time_backend.get_time(&time_backend) - start_time)
         {
           ol_animate_lerp(current_gamma_value, gamma_value, anim_gamma_value,
                           video_backend.gamma_ramp_size,
                           current_time, opt_anim);
           video_backend.set_gamma(&video_backend, anim_gamma_value);
 
-          ol_animate_sleep(opt_delay);
+          time_backend.sleep(&time_backend, opt_delay);
         }
 
       OL_GAMMA_FREE(anim_gamma_value);
@@ -316,6 +325,9 @@ main(int argc, char** argv)
 
  free_current_gamma_value:
   OL_GAMMA_FREE(current_gamma_value);
+
+ free_time_backend:
+  time_backend.uninit(&time_backend);
 
  free_gamma_backend:
   gamma_backend.uninit(&gamma_backend);
