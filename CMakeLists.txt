@@ -28,20 +28,12 @@ set(CMAKE_BUILD_TYPE "Debug")
 
 ### Check system ###
 
-find_package(PkgConfig)
-if (PKG_CONFIG_FOUND)
+# Check for X11
+find_package(X11)
+if (X11_FOUND AND X11_xf86vmode_FOUND)
+  set(HAS_X11 on)
+endif()
 
-  # Check for X11
-  find_package(X11)
-  if (X11_FOUND)
-    pkg_check_modules(XF86VM xxf86vm)
-
-    if (XF86VM_FOUND)
-      set(HAS_X11 on)
-    endif (XF86VM_FOUND)
-  endif(X11_FOUND)
-
-endif (PKG_CONFIG_FOUND)
 
 include(CheckSymbolExists)
 check_symbol_exists(clock_nanosleep "time.h" HAS_CLOCK_NANOSLEEP)
