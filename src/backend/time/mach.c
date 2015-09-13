@@ -20,39 +20,64 @@
   THE SOFTWARE.
 */
 
-#include "video.h"
+#include "time.h"
 
-#define OL_BACKEND_PREFIX video
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+#define OL_BACKEND_PREFIX time_mach
 #include "../backend.h"
 
 
-OL_BACKEND_INIT(x11);
-OL_BACKEND_INIT(ios);
-OL_BACKEND_LIST() =
+struct ol_backend_time_mach_data_s
 {
-#ifdef OL_CMAKE_USE_X11
-  OL_BACKEND_LIST_ITEM(x11),
-#else
-  OL_BACKEND_LIST_FAIL(),
-#endif
-
-#ifdef OL_CMAKE_USE_IOS
-  OL_BACKEND_LIST_ITEM(ios),
-#else
-  OL_BACKEND_LIST_FAIL(),
-#endif
-
-  OL_BACKEND_LIST_END()
+  mach_timebase_info_data_t timebase;
 };
 
 
 int
-ol_backend_video_init(struct ol_backend_video_s* self, int index,
-                      void* data)
+ol_backend_time_mach_init(struct ol_backend_time_s* self)
 {
-  int ret;
+  OL_BACKEND_DATA_INIT(data);
 
-  OL_BACKEND_FIND(ret);
+  mach_timebase_info(&data->timebase);
 
-  return ret;
+  self->data = data;
+  return 0;
 }
+
+void
+ol_backend_time_mach_uninit(struct ol_backend_time_s* self)
+{
+  free(self->data);
+}
+
+
+ol_time_t
+ol_backend_time_mach_get_time(struct ol_backend_time_s* self)
+{
+  uint64_t absolute_time = mach_absolute_time();
+  absolute_time *= OL_BACKEND_DATA()->timebase.numer;
+  absolute_time /= OL_BACKEND_DATA()->timebase.denom;
+  absolute_time /= 1e6;
+
+  return absolute_time;
+}
+
+void
+ol_backend_time_posix_sleep(struct ol_backend_time_s* self,
+                            ol_time_t sleep_time);
+
+
+struct ol_backend_time_s ol_backend_time_mach =
+  {
+    .data     = NULL,
+
+    .init     = ol_backend_time_mach_init,
+    .uninit   = ol_backend_time_mach_uninit,
+
+    .get_time = ol_backend_time_mach_get_time,
+    .sleep    = ol_backend_time_posix_sleep
+  };

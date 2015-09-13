@@ -20,27 +20,32 @@
   THE SOFTWARE.
 */
 
-#include "animate.h"
-#include <time.h>
-#include <unistd.h>
+#ifndef _OPENLUX_BACKEND_TIME_H
+#define _OPENLUX_BACKEND_TIME_H
 
 
-void
-ol_animate_lerp(struct ol_gamma_s current,
-                struct ol_gamma_s new,
-                struct ol_gamma_s anim,
-                int gamma_ramp_size,
-                ol_time_t time,
-                ol_time_t end_time)
+#include <stdint.h>
+
+
+typedef int64_t ol_time_t;
+
+struct ol_backend_time_s;
+struct ol_backend_time_s
 {
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-#define _lerp(start, end)                                               \
-      (((ol_time_t)(start)) +                                           \
-       (((((ol_time_t)(end)) - ((ol_time_t)(start))) * time) / end_time))
+  void* data;
 
-      anim.red[i]   = _lerp(current.red[i]  , new.red[i]  );
-      anim.green[i] = _lerp(current.green[i], new.green[i]);
-      anim.blue[i]  = _lerp(current.blue[i] , new.blue[i] );
-    }
-}
+  int (*init)(struct ol_backend_time_s* self);
+  void (*uninit)(struct ol_backend_time_s* self);
+
+  ol_time_t (*get_time)(struct ol_backend_time_s* self);
+  void (*sleep)(struct ol_backend_time_s* self, ol_time_t sleep_time);
+};
+
+
+#define OL_BACKEND_TIME_INDEX_POSIX 0
+#define OL_BACKEND_TIME_INDEX_MACH 1
+
+int ol_backend_time_init(struct ol_backend_time_s* self, int index, void* data);
+
+
+#endif

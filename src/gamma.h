@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 
-#ifdef OL_USE_IOS
+#ifdef OL_CMAKE_USE_IOS
 typedef uint32_t ol_gamma_t;
 #else
 typedef unsigned short ol_gamma_t;
@@ -50,10 +50,15 @@ struct ol_gamma_s
     (gamma).blue = (gamma).green + (size);      \
   }
 
-#define OL_GAMMA_MALLOC(size, gamma)            \
-  {                                             \
-    (gamma).red = malloc(OL_GAMMA_SIZE(size));  \
-    _OL_GAMMA_INIT(size, gamma);                \
+#define OL_GAMMA_MALLOC(size, gamma)                            \
+  {                                                             \
+    (gamma).red = malloc(OL_GAMMA_SIZE(size));                  \
+    if (!(gamma).red)                                           \
+      {                                                         \
+        OL_LOG_ERR("Unable to allocate %ld bytes for "#gamma,   \
+                   OL_GAMMA_SIZE(size));                        \
+      }                                                         \
+    _OL_GAMMA_INIT(size, gamma);                                \
   }
 
 #define OL_GAMMA_FREE(gamma)                    \

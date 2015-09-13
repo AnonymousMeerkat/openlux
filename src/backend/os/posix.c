@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "../time/time.h"
 
 #define OL_BACKEND_PREFIX os_posix
 #include "../backend.h"
@@ -129,10 +130,15 @@ ol_backend_os_posix_exists(struct ol_backend_os_s* self, char* name)
 }
 
 
-struct ol_backend_os_s
-ol_backend_os_posix =
+struct ol_backend_os_s ol_backend_os_posix =
   {
     .data = NULL,
+
+#ifdef OL_CMAKE_USE_IOS
+    .time_index = OL_BACKEND_TIME_INDEX_MACH,
+#else
+    .time_index = OL_BACKEND_TIME_INDEX_POSIX,
+#endif
 
     .init   = ol_backend_os_posix_init,
     .uninit = ol_backend_os_posix_uninit,

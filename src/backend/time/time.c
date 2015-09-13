@@ -20,27 +20,36 @@
   THE SOFTWARE.
 */
 
-#include "animate.h"
-#include <time.h>
-#include <unistd.h>
+#include "time.h"
 
 
-void
-ol_animate_lerp(struct ol_gamma_s current,
-                struct ol_gamma_s new,
-                struct ol_gamma_s anim,
-                int gamma_ramp_size,
-                ol_time_t time,
-                ol_time_t end_time)
+#define OL_BACKEND_PREFIX time
+#include "../backend.h"
+
+
+OL_BACKEND_INIT(posix);
+OL_BACKEND_INIT(mach);
+OL_BACKEND_LIST() =
 {
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-#define _lerp(start, end)                                               \
-      (((ol_time_t)(start)) +                                           \
-       (((((ol_time_t)(end)) - ((ol_time_t)(start))) * time) / end_time))
+  OL_BACKEND_LIST_ITEM(posix),
 
-      anim.red[i]   = _lerp(current.red[i]  , new.red[i]  );
-      anim.green[i] = _lerp(current.green[i], new.green[i]);
-      anim.blue[i]  = _lerp(current.blue[i] , new.blue[i] );
-    }
+#ifdef OL_CMAKE_USE_IOS
+  OL_BACKEND_LIST_ITEM(mach),
+#else
+  OL_BACKEND_LIST_FAIL(),
+#endif
+
+  OL_BACKEND_LIST_END()
+};
+
+
+int
+ol_backend_time_init(struct ol_backend_time_s* self, int index,
+                     void* data)
+{
+  int ret;
+
+  OL_BACKEND_FIND(ret);
+
+  return ret;
 }

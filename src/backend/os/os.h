@@ -25,6 +25,8 @@
 
 
 #include <stdio.h>
+#include <stdint.h>
+
 
 #define OL_BACKEND_OS_IS_FILE 1
 #define OL_BACKEND_OS_IS_DIR  2
@@ -33,6 +35,7 @@ struct ol_backend_os_s;
 struct ol_backend_os_s
 {
   void* data;
+  int time_index;
 
   int (*init)(struct ol_backend_os_s* self);
   void (*uninit)(struct ol_backend_os_s* self);
