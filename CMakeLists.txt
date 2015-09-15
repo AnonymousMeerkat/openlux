@@ -32,6 +32,9 @@ set(CMAKE_BUILD_TYPE "Debug")
 find_package(X11)
 if (X11_FOUND AND X11_xf86vmode_FOUND)
   set(HAS_X11 on)
+  set(FOUND_VIDEO_BACKEND on)
+else()
+  message("X11 not found")
 endif()
 
 
@@ -51,14 +54,21 @@ endif (HAS_NANOSLEEP)
 #   pointing to the root directory of the iOS SDK)
 if (EXISTS "${SDK_ROOT}/System/Library/PrivateFrameworks/IOMobileFramebuffer.framework")
   set(HAS_IOS on)
+  set(FOUND_VIDEO_BACKEND on)
+else()
+  message("iOS SDK not found")
 endif ()
+
+if (NOT FOUND_VIDEO_BACKEND)
+  message(FATAL_ERROR "Unable to find video backend")
+endif (NOT FOUND_VIDEO_BACKEND)
 
 if (HAS_IOS AND USE_IOS)
 
   message("Building for iOS")
   set(BUILD_IOS on)
   add_definitions("-DOL_CMAKE_USE_IOS")
-
+  set(VIDEO_BACKEND_LIBS "")
 
   set(CMAKE_OSX_SYSROOT ${SDK_ROOT})
   include_directories(${SDK_ROOT}/usr/include)
@@ -71,6 +81,7 @@ else ()
     message("Building with X11 support")
     set(BUILD_X11 on)
     add_definitions("-DOL_CMAKE_USE_X11")
+    set(VIDEO_BACKEND_LIBS ${X11_LIBRARIES} ${X11_Xxf86vm_LIB})
   endif ()
 
 endif ()
