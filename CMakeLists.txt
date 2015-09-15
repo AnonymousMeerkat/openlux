@@ -20,7 +20,7 @@ option(USE_X11 "Build with X11 support" ON)
 
 ### Project variables ###
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -std=gnu99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-label -std=gnu99")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
 set(CMAKE_BUILD_TYPE "Debug")

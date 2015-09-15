@@ -69,14 +69,12 @@ ol_backend_gamma_relative_rgb(struct ol_backend_gamma_s* self,
   unsigned int bluec  = 0;
 
   unsigned int color_div;
-  unsigned int color_mod;
 
   for (int j = 0; j < 256; j++)
     {
 #define do_color(col)                                                   \
       {                                                                 \
         color_div = col##c >> 8;                                        \
-        color_mod = col##c & 0xff;                                      \
         gamma.col[j] = OL_BACKEND_DATA()->col[color_div];               \
       }
 
