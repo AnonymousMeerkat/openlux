@@ -26,14 +26,14 @@
 
 /* Implementation of
    http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/ */
-ol_color_t ol_kelvin_rgb(unsigned int kelvin) {
+ol_color_t ol_kelvin_rgb(float kelvin) {
   float red   = 0;
   float green = 0;
   float blue  = 0;
 
-  kelvin /= 100;
+  kelvin /= 100.;
 
-  if (kelvin <= 66)
+  if (kelvin <= 66.)
     {
       red = 255;
 
@@ -42,26 +42,26 @@ ol_color_t ol_kelvin_rgb(unsigned int kelvin) {
     }
   else
     {
-      red = 329.698727446 * pow((kelvin - 60), -0.1332047592);
+      red = 329.698727446 * pow((kelvin - 60.), -0.1332047592);
       red = OL_COLOR_LIMIT(red);
 
-      green = 288.1221695283 * pow((kelvin - 60), -0.0755148492);
+      green = 288.1221695283 * pow((kelvin - 60.), -0.0755148492);
       green = OL_COLOR_LIMIT(green);
     }
 
-  if (kelvin >= 66)
+  if (kelvin >= 66.)
     {
       blue = 255;
     }
   else
     {
-      if (kelvin <= 19)
+      if (kelvin <= 19.)
         {
           blue = 0;
         }
       else
         {
-          blue = 138.5177312231 * log(kelvin - 10) - 305.0447927307;
+          blue = 138.5177312231 * log(kelvin - 10.) - 305.0447927307;
           blue = OL_COLOR_LIMIT(blue);
         }
     }
