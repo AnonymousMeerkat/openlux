@@ -60,10 +60,13 @@ ol_main_help(char* argv0)
   puts(" -r, --red           red color channel (0-255, default: auto)");
   puts(" -g, --green         green color channel (0-255, default: auto)");
   puts(" -b, --blue          blue color channel (0-255, default: auto)");
-  puts(" -i, --identity      sets display gamma to identity");
+  puts(" -i, --identity      resets display gamma to identity (no color");
+  puts("                         bias)");
+  puts("");
   puts(" -R, --reset         resets display gamma to last saved gamma");
   puts(" -s, --save          saves current gamma (automatically done when");
   puts("                         openlux is run for the first time on boot)");
+  puts("");
   puts(" -a, --animate       animation time in milliseconds (default: 0)");
   puts(" -d, --delay         animation delay per \"frame\" in milliseconds");
   puts("                         (default: 0)");
