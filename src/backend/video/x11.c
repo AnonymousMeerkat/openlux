@@ -79,9 +79,9 @@ ol_backend_video_x11_init(struct ol_backend_video_s* self)
 
   gamma_ramp_size = -1;
   XF86VidModeGetGammaRampSize(data->display, data->screen, &gamma_ramp_size);
-  if (gamma_ramp_size != 02000 && gamma_ramp_size != 0400)
+  if (gamma_ramp_size == 0)
     {
-      OL_LOG_ERR("Only 24-bit or 32-bit depths are supported at this time");
+      OL_LOG_ERR("0-bit depths are not supported at this time");
 
       ret = -1;
       goto badend;

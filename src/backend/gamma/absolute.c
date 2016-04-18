@@ -62,30 +62,29 @@ ol_backend_gamma_absolute_rgb(struct ol_backend_gamma_s* self,
   ol_gamma_t cblue  = 0;
 
   /* Current */
-  unsigned int redc   = 0;
-  unsigned int greenc = 0;
-  unsigned int bluec  = 0;
+  double redc   = 0.;
+  double greenc = 0.;
+  double bluec  = 0.;
 
   /* Increment */
-  unsigned int redi   = 0xffff * OL_COLOR_RED(color);
-  unsigned int greeni = 0xffff * OL_COLOR_GREEN(color);
-  unsigned int bluei  = 0xffff * OL_COLOR_BLUE(color);
-
-  unsigned int range = 0xff * (gamma_ramp_size - 1);
+  double whitei = 65536  / ((double)gamma_ramp_size);
+  double redi   = whitei * (OL_COLOR_RED(color) / 255.);
+  double greeni = whitei * (OL_COLOR_GREEN(color) / 255.);
+  double bluei  = whitei * (OL_COLOR_BLUE(color) / 255.);
 
   OL_UTIL_UNUSED(self);
 
   for (int i = 0; i < gamma_ramp_size; i++)
     {
-      cred = redc / range;
+      cred = (ol_gamma_t)redc;
       redc += redi;
       gamma.red[i] = cred;
 
-      cgreen = greenc / range;
+      cgreen = (ol_gamma_t)greenc;
       greenc += greeni;
       gamma.green[i] = cgreen;
 
-      cblue = bluec / range;
+      cblue = (ol_gamma_t)bluec;
       bluec += bluei;
       gamma.blue[i] = cblue;
     }
@@ -97,12 +96,27 @@ ol_backend_gamma_absolute_identity(struct ol_backend_gamma_s* self,
 {
   OL_UTIL_UNUSED(self);
 
-  for (int i = 0; i < gamma_ramp_size; i++)
-    {
-      gamma.red[i] = i << 8;
-      gamma.green[i] = i << 8;
-      gamma.blue[i] = i << 8;
-    }
+  if (gamma_ramp_size == 2048)
+    for (int i = 0; i < gamma_ramp_size; i++)
+      {
+        gamma.red[i]   = i << 5;
+        gamma.green[i] = i << 5;
+        gamma.blue[i]  = i << 5;
+      }
+  else if (gamma_ramp_size == 256)
+    for (int i = 0; i < gamma_ramp_size; i++)
+      {
+        gamma.red[i]   = i << 8;
+        gamma.green[i] = i << 8;
+        gamma.blue[i]  = i << 8;
+      }
+  else
+    for (int i = 0; i < gamma_ramp_size; i++)
+      {
+        gamma.red[i]   = i * (65536/gamma_ramp_size);
+        gamma.green[i] = i * (65536/gamma_ramp_size);
+        gamma.blue[i]  = i * (65536/gamma_ramp_size);
+      }
 }
 
 
