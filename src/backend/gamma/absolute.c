@@ -54,7 +54,8 @@ ol_backend_gamma_absolute_set_default_gamma(struct ol_backend_gamma_s* self,
 void
 ol_backend_gamma_absolute_rgb(struct ol_backend_gamma_s* self,
                               int gamma_ramp_size,
-                              ol_color_t color, struct ol_gamma_s gamma)
+                              struct ol_color_t color,
+                              struct ol_gamma_s gamma)
 {
   /* Calculated */
   ol_gamma_t cred   = 0;
@@ -68,9 +69,9 @@ ol_backend_gamma_absolute_rgb(struct ol_backend_gamma_s* self,
 
   /* Increment */
   double whitei = 65536  / ((double)gamma_ramp_size);
-  double redi   = whitei * (OL_COLOR_RED(color) / 255.);
-  double greeni = whitei * (OL_COLOR_GREEN(color) / 255.);
-  double bluei  = whitei * (OL_COLOR_BLUE(color) / 255.);
+  double redi   = whitei * color.red;
+  double greeni = whitei * color.green;
+  double bluei  = whitei * color.blue;
 
   OL_UTIL_UNUSED(self);
 

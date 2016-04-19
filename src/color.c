@@ -26,13 +26,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-ol_color_byte_t
-ol_color_parse(char* str, ol_color_byte_t old_color)
+
+ol_color_channel_t
+ol_color_parse(char* str, ol_color_channel_t old_color)
 {
   if (!strcmp(str, "auto"))
-    {
-      return old_color;
-    }
+    return old_color;
+
 
   bool change = false;
   if (str[0] == '+' || str[0] == '-')
@@ -41,16 +41,24 @@ ol_color_parse(char* str, ol_color_byte_t old_color)
       change = true;
     }
 
+
   /* FIXME: atoi with non-numeric inputs causes undefined behaviour */
-  int c = atoi(str);
+  ol_color_channel_t c;
+
+  if (strchr(str, '.'))
+    c = atof(str);
+  else
+    c = ((ol_color_channel_t)atoi(str)) / 255.;
+
   c = OL_COLOR_LIMIT(c);
 
   if (change)
     {
-      c = (0x80000000 | (c)) ^ (0x80000000 - !!(str[-1] - 43));
-      if (c & 0x80000000) c++;
-      c += old_color;
-      return OL_COLOR_LIMIT(c);
+      if (str[-1] == '+')
+        return OL_COLOR_LIMIT(old_color + c);
+      else
+        return OL_COLOR_LIMIT(old_color - c);
     }
+
   return c;
 }

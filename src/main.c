@@ -264,16 +264,11 @@ main(int argc, char** argv)
     }
   else if (!opt_identity)
     {
-      ol_color_t color = ol_kelvin_rgb(opt_kelvin);
+      struct ol_color_t color = ol_kelvin_rgb(opt_kelvin);
 
-      color = OL_COLOR_INIT(
-                            ol_color_parse(opt_red,
-                                           OL_COLOR_RED(color)),
-                            ol_color_parse(opt_green,
-                                           OL_COLOR_GREEN(color)),
-                            ol_color_parse(opt_blue,
-                                           OL_COLOR_BLUE(color))
-                            );
+      color.red   = ol_color_parse(opt_red,   color.red);
+      color.green = ol_color_parse(opt_green, color.green);
+      color.blue  = ol_color_parse(opt_blue,  color.blue);
 
       gamma_backend.rgb(&gamma_backend,
                         video_backend.gamma_ramp_size,

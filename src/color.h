@@ -24,33 +24,29 @@
 #define _OPENLUX_COLOR_H
 
 
-typedef unsigned int ol_color_t;
-typedef unsigned char ol_color_byte_t;
+typedef double ol_color_channel_t;
+
+struct ol_color_t
+{
+  ol_color_channel_t red, green, blue;
+};
 
 
-#define OL_COLOR_LIMIT(c) (((c) > 255) ? 255 : (((c) < 0) ? 0 : (c)))
-#define OL_COLOR_BYTE(c) ((c) & 0xff)
+#define OL_COLOR_LIMIT(c) (((c) > 1.) ? 1. : (((c) < 0.) ? 0. : (c)))
+#define OL_COLOR_BYTE(c) (((int)(c * 255.)) & 0xff)
 
 
-#define OL_COLOR_INIT(r, g, b)                  \
-  (((OL_COLOR_BYTE(r) << 16) |                  \
-    (OL_COLOR_BYTE(g) << 8)) |                  \
-   OL_COLOR_BYTE(b))
+// emacs indentation :(
+#define OL_COLOR_INIT(r, g, b) \
+  (struct ol_color_t) {        \
+    .red = r,                  \
+      .green = g,              \
+      .blue = b                \
+      }
 
 
-#define OL_COLOR_RED(c) (((c) >> 16) & 0xff)
-#define OL_COLOR_GREEN(c) (((c) >> 8) & 0xff)
-#define OL_COLOR_BLUE(c) ((c) & 0xff)
+ol_color_channel_t
+ol_color_parse(char* str, ol_color_channel_t old_color);
 
-#define OL_COLOR_RED_GREEN(c) ((((c) >> 8) & 0xffff) << 8)
-#define OL_COLOR_RED_BLUE(c) ((OL_COLOR_RED(c) << 16) | (OL_COLOR_BLUE(c)))
-#define OL_COLOR_GREEN_BLUE(c) ((c) & 0xffff)
-
-
-#define OL_COLOR_SET_RED(c, r) ((OL_COLOR_BYTE(r) << 16) | (OL_COLOR_GREEN_BLUE(c)))
-#define OL_COLOR_SET_GREEN(c, g) (((OL_COLOR_BYTE(g) << 8) | (OL_COLOR_RED_BLUE(c))))
-#define OL_COLOR_SET_BLUE(c, b) ((OL_COLOR_BYTE(b)) | (OL_COLOR_RED_GREEN(c)))
-
-ol_color_byte_t ol_color_parse(char* str, ol_color_byte_t old_color);
 
 #endif

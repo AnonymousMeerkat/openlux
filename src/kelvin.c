@@ -24,51 +24,52 @@
 #include "color.h"
 #include <math.h>
 
+
 /* Implementation of
    http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/ */
-ol_color_t ol_kelvin_rgb(float kelvin) {
-  float red   = 0;
-  float green = 0;
-  float blue  = 0;
+struct ol_color_t ol_kelvin_rgb(double kelvin) {
+  ol_color_channel_t red   = 0.;
+  ol_color_channel_t green = 0.;
+  ol_color_channel_t blue  = 0.;
 
   kelvin /= 100.;
 
   if (kelvin <= 66.)
     {
-      red = 255;
+      red = 255.;
 
       green = 99.4708025861 * log(kelvin) - 161.1195681661;
-      green = OL_COLOR_LIMIT(green);
     }
   else
     {
       red = 329.698727446 * pow((kelvin - 60.), -0.1332047592);
-      red = OL_COLOR_LIMIT(red);
 
       green = 288.1221695283 * pow((kelvin - 60.), -0.0755148492);
-      green = OL_COLOR_LIMIT(green);
     }
 
   if (kelvin >= 66.)
     {
-      blue = 255;
+      blue = 255.;
     }
   else
     {
       if (kelvin <= 19.)
         {
-          blue = 0;
+          blue = 0.;
         }
       else
         {
           blue = 138.5177312231 * log(kelvin - 10.) - 305.0447927307;
-          blue = OL_COLOR_LIMIT(blue);
         }
     }
 
-  ol_color_byte_t redc = red;
-  ol_color_byte_t greenc = green;
-  ol_color_byte_t bluec = blue;
+  red   /= 255.;
+  green /= 255.;
+  blue  /= 255.;
 
-  return OL_COLOR_INIT(redc, greenc, bluec);
+  red   = OL_COLOR_LIMIT(red);
+  green = OL_COLOR_LIMIT(green);
+  blue  = OL_COLOR_LIMIT(blue);
+
+  return OL_COLOR_INIT(red, green, blue);
 }

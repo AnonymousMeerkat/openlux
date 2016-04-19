@@ -58,33 +58,33 @@ ol_backend_gamma_relative_set_default_gamma(struct ol_backend_gamma_s* self,
   memcpy(self->data, &gamma, sizeof(struct ol_gamma_s));
 }
 
-/* FIXME: Doesn't use gamma_ramp_size */
 void
 ol_backend_gamma_relative_rgb(struct ol_backend_gamma_s* self,
                               int gamma_ramp_size,
-                              ol_color_t color, struct ol_gamma_s gamma)
+                              struct ol_color_t color,
+                              struct ol_gamma_s gamma)
 {
-  unsigned int redc   = 0;
-  unsigned int greenc = 0;
-  unsigned int bluec  = 0;
+  ol_color_channel_t redc   = 0;
+  ol_color_channel_t greenc = 0;
+  ol_color_channel_t bluec  = 0;
 
   unsigned int color_div;
 
-  for (int j = 0; j < 256; j++)
+  for (int j = 0; j < gamma_ramp_size; j++)
     {
-#define do_color(col)                                                   \
-      {                                                                 \
-        color_div = col##c >> 8;                                        \
-        gamma.col[j] = OL_BACKEND_DATA()->col[color_div];               \
+#define do_color(col)                                           \
+      {                                                         \
+        color_div = ((int)col##c);                              \
+        gamma.col[j] = OL_BACKEND_DATA()->col[color_div];       \
       }
 
       do_color(red);
       do_color(green);
       do_color(blue);
 
-      redc += OL_COLOR_RED(color);
-      greenc += OL_COLOR_GREEN(color);
-      bluec += OL_COLOR_BLUE(color);
+      redc   += color.red;
+      greenc += color.green;
+      bluec  += color.blue;
     }
 }
 

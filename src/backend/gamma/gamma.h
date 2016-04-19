@@ -45,7 +45,7 @@ struct ol_backend_gamma_s
 
   void (*rgb)(struct ol_backend_gamma_s* self,
               int gamma_ramp_size,
-              ol_color_t color, struct ol_gamma_s gamma);
+              struct ol_color_t color, struct ol_gamma_s gamma);
 
   void (*identity)(struct ol_backend_gamma_s* self,
                    int gamma_ramp_size, struct ol_gamma_s gamma);
