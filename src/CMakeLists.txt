@@ -14,7 +14,7 @@ target_link_libraries(
   openlux
 
   ol_backend_os ol_backend_video ol_backend_gamma ol_backend_time
-  m ${VIDEO_BACKEND_LIBS}
+  ol_backend_kelvin m ${VIDEO_BACKEND_LIBS}
   )
 
 install(

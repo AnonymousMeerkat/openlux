@@ -31,11 +31,11 @@
 #include "backend/video/video.h"
 #include "backend/gamma/gamma.h"
 #include "backend/time/time.h"
+#include "backend/kelvin/kelvin.h"
 #include "animate.h"
 #include "log.h"
 #include "color.h"
 #include "gamma.h"
-#include "kelvin.h"
 
 
 static void
@@ -108,14 +108,15 @@ main(int argc, char** argv)
   int c;
   int option_index;
 
-  struct ol_backend_os_s os_backend;
-  struct ol_backend_video_s video_backend;
-  struct ol_backend_gamma_s gamma_backend;
-  struct ol_backend_time_s time_backend;
+  struct ol_backend_os_s     os_backend;
+  struct ol_backend_video_s  video_backend;
+  struct ol_backend_gamma_s  gamma_backend;
+  struct ol_backend_time_s   time_backend;
+  struct ol_backend_kelvin_s kelvin_backend;
 
-  struct ol_color_s default_color;
   struct ol_color_s current_color = OL_COLOR_WHITE;
 #ifdef OL_CMAKE_USE_IOS
+  struct ol_color_s default_color;
   struct ol_color_s anim_color;
   FILE* color_file;
 #endif
@@ -227,6 +228,13 @@ main(int argc, char** argv)
       goto free_gamma_backend;
     }
 
+  if (ol_backend_kelvin_init(&kelvin_backend, -1, NULL))
+    {
+      OL_LOG_ERR("Unable to load kelvin backend");
+      ret = 6;
+      goto free_kelvin_backend;
+    }
+
 
   OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, current_gamma_value);
   video_backend.get_gamma(&video_backend, current_gamma_value);
@@ -271,7 +279,8 @@ main(int argc, char** argv)
     }
   else if (!opt_identity)
     {
-      current_color = ol_kelvin_rgb(opt_kelvin);
+      current_color = kelvin_backend.kelvin(&kelvin_backend,
+                                            opt_kelvin);
 
       current_color.red   = ol_color_parse(opt_red,
                                            current_color.red);
@@ -368,6 +377,9 @@ main(int argc, char** argv)
 
  free_current_gamma_value:
   OL_GAMMA_FREE(current_gamma_value);
+
+ free_kelvin_backend:
+  kelvin_backend.uninit(&kelvin_backend);
 
  free_time_backend:
   time_backend.uninit(&time_backend);
