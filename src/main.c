@@ -180,7 +180,7 @@ main(int argc, char** argv)
             opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_TANNER;
           else
             {
-              OL_LOG_ERR("Invalid for --kelvin-backend: %s\n",
+              OL_LOG_ERR("Invalid option for --kelvin-backend: %s",
                          optarg);
               return -1;
             }
