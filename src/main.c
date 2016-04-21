@@ -113,10 +113,12 @@ main(int argc, char** argv)
   struct ol_backend_gamma_s gamma_backend;
   struct ol_backend_time_s time_backend;
 
-  struct ol_color_t default_color;
-  struct ol_color_t current_color;
-  struct ol_color_t anim_color;
+  struct ol_color_s default_color;
+  struct ol_color_s current_color;
+#ifdef OL_CMAKE_USE_IOS
+  struct ol_color_s anim_color;
   FILE* color_file;
+#endif
 
   struct ol_gamma_s default_gamma_value;
   struct ol_gamma_s current_gamma_value;
@@ -297,7 +299,7 @@ main(int argc, char** argv)
   if (os_backend.exists(&os_backend, "color"))
     {
       color_file = os_backend.open(&os_backend, "color", "rb");
-      fread(&default_color, 1, sizeof(struct ol_color_t), color_file);
+      fread(&default_color, 1, sizeof(struct ol_color_s), color_file);
       fclose(color_file);
     }
 #endif
@@ -348,7 +350,7 @@ main(int argc, char** argv)
 
 #ifdef OL_CMAKE_USE_IOS
   color_file = os_backend.open(&os_backend, "color", "wb");
-  fwrite(&current_color, 1, sizeof(struct ol_color_t), color_file);
+  fwrite(&current_color, 1, sizeof(struct ol_color_s), color_file);
   fclose(color_file);
 #endif
 

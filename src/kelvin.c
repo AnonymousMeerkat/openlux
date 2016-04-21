@@ -27,7 +27,7 @@
 
 /* Implementation of
    http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/ */
-struct ol_color_t ol_kelvin_rgb(double kelvin) {
+struct ol_color_s ol_kelvin_rgb(double kelvin) {
   ol_color_channel_t red   = 0.;
   ol_color_channel_t green = 0.;
   ol_color_channel_t blue  = 0.;

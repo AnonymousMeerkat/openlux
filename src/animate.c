@@ -52,9 +52,9 @@ ol_animate_lerp(struct ol_gamma_s current,
 
 
 void
-ol_animate_lerp_rgb(struct ol_color_t current,
-                    struct ol_color_t new,
-                    struct ol_color_t* anim,
+ol_animate_lerp_rgb(struct ol_color_s current,
+                    struct ol_color_s new,
+                    struct ol_color_s* anim,
                     ol_time_t time,
                     ol_time_t end_time)
 {

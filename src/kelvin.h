@@ -25,6 +25,6 @@
 
 #include "color.h"
 
-struct ol_color_t ol_kelvin_rgb(double kelvin);
+struct ol_color_s ol_kelvin_rgb(double kelvin);
 
 #endif

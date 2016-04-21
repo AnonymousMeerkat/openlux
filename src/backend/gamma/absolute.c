@@ -54,7 +54,7 @@ ol_backend_gamma_absolute_set_default_gamma(struct ol_backend_gamma_s* self,
 void
 ol_backend_gamma_absolute_rgb(struct ol_backend_gamma_s* self,
                               int gamma_ramp_size,
-                              struct ol_color_t color,
+                              struct ol_color_s color,
                               struct ol_gamma_s gamma)
 {
   /* Calculated */

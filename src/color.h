@@ -26,14 +26,10 @@
 
 typedef double ol_color_channel_t;
 
-// TODO: rename to ol_color_s
-struct ol_color_t
+struct ol_color_s
 {
   ol_color_channel_t red, green, blue;
 };
-
-
-#define OL_COLOR_WHITE ((struct ol_color_t) {1., 1., 1.})
 
 
 #define OL_COLOR_LIMIT(c) (((c) > 1.) ? 1. : (((c) < 0.) ? 0. : (c)))
@@ -42,11 +38,13 @@ struct ol_color_t
 
 // emacs indentation :(
 #define OL_COLOR_INIT(r, g, b) \
-  (struct ol_color_t) {        \
+  ((struct ol_color_s) {       \
     .red = r,                  \
       .green = g,              \
       .blue = b                \
-      }
+      })
+
+#define OL_COLOR_WHITE OL_COLOR_INIT(1., 1., 1.)
 
 
 ol_color_channel_t
