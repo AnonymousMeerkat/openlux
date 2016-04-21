@@ -51,42 +51,49 @@ ol_main_help(char* argv0)
   puts("");
   puts("Usage:");
   printf(" %s [options]\n", argv0);
-  puts("");
-  puts("Adjusts screen color temperature");
-  puts("");
-  puts("Options:");
-  puts(" -k, --kelvin        color temperature in kelvin (1000-40000,");
-  puts("                         default: 3400)");
-  puts(" -r, --red           red color channel (0-255, default: auto)");
-  puts(" -g, --green         green color channel (0-255, default: auto)");
-  puts(" -b, --blue          blue color channel (0-255, default: auto)");
-  puts(" -i, --identity      resets display gamma to identity (no color");
-  puts("                         bias)");
-  puts("");
-  puts(" -R, --reset         resets display gamma to last saved gamma");
-  puts(" -s, --save          saves current gamma (automatically done when");
-  puts("                         openlux is run for the first time on boot)");
-  puts("");
-  puts(" -a, --animate       animation time in milliseconds (default: 0)");
-  puts(" -d, --delay         animation delay per \"frame\" in milliseconds");
-  puts("                         (default: 0)");
-  puts("");
-  puts(" -h, --help          display this help and exit");
-  puts(" -V, --version       display version information and exit");
+  char* helpstr =
+    "\n"
+    "Adjusts screen color temperature\n"
+    "\n"
+    "Options:\n"
+    " -k, --kelvin          color temperature in kelvin (1000-40000,\n"
+    "                           default: 3400)\n"
+    " -r, --red             red color channel (0-255, default: auto)\n"
+    " -g, --green           green color channel (0-255, default: auto)\n"
+    " -b, --blue            blue color channel (0-255, default: auto)\n"
+    " -i, --identity        resets display gamma to identity\n"
+    "                           (no color bias)\n"
+    "\n"
+    " -K, --kelvin-backend  kelvin algorithm backend, one of these:\n"
+    "                           neilb (default)\n"
+    "                           tanner\n"
+    "\n"
+    " -R, --reset           resets display gamma to last saved gamma\n"
+    " -s, --save            saves current gamma (automatically done when\n"
+    "                           openlux is run for the first time on boot)\n"
+    "\n"
+    " -a, --animate         animation time in milliseconds (default: 0)\n"
+    " -d, --delay           animation delay per \"frame\" in milliseconds\n"
+    "                           (default: 0)\n"
+    "\n"
+    " -h, --help            display this help and exit\n"
+    " -V, --version         display version information and exit\n";
+  puts(helpstr);
 }
 
 static struct option _ol_main_long_options[] = {
-  {"kelvin",   required_argument, 0, 'k'},
-  {"red",      required_argument, 0, 'r'},
-  {"green",    required_argument, 0, 'g'},
-  {"blue",     required_argument, 0, 'b'},
-  {"identity", no_argument,       0, 'i'},
-  {"reset",    no_argument,       0, 'R'},
-  {"save",     no_argument,       0, 's'},
-  {"animate",  required_argument, 0, 'a'},
-  {"delay",    required_argument, 0, 'd'},
-  {"help",     no_argument,       0, 'h'},
-  {"version",  no_argument,       0, 'V'},
+  {"kelvin",         required_argument, 0, 'k'},
+  {"red",            required_argument, 0, 'r'},
+  {"green",          required_argument, 0, 'g'},
+  {"blue",           required_argument, 0, 'b'},
+  {"identity",       no_argument,       0, 'i'},
+  {"kelvin-backend", required_argument, 0, 'K' },
+  {"reset",          no_argument,       0, 'R'},
+  {"save",           no_argument,       0, 's'},
+  {"animate",        required_argument, 0, 'a'},
+  {"delay",          required_argument, 0, 'd'},
+  {"help",           no_argument,       0, 'h'},
+  {"version",        no_argument,       0, 'V'},
   {0, 0, 0, 0}
 };
 
@@ -95,15 +102,16 @@ main(int argc, char** argv)
 {
   int ret = 0;
 
-  int opt_kelvin = 3400;
-  char opt_red[256] = "auto";
-  char opt_green[256] = "auto";
-  char opt_blue[256] = "auto";
-  bool opt_identity = 0;
-  bool opt_save = 0;
-  bool opt_reset = 0;
-  int opt_anim = 0;
-  int opt_delay = 0;
+  int  opt_kelvin         = 3400;
+  char opt_red[256]       = "auto";
+  char opt_green[256]     = "auto";
+  char opt_blue[256]      = "auto";
+  bool opt_identity       = 0;
+  int  opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_NEILB;
+  bool opt_save           = 0;
+  bool opt_reset          = 0;
+  int  opt_anim           = 0;
+  int  opt_delay          = 0;
 
   int c;
   int option_index;
@@ -135,8 +143,8 @@ main(int argc, char** argv)
 
   while (1)
     {
-      c = getopt_long(argc, argv, "hVk:r:g:b:iRsa:d:", _ol_main_long_options,
-                      &option_index);
+      c = getopt_long(argc, argv, "hVk:r:g:b:iK:Rsa:d:",
+                      _ol_main_long_options, &option_index);
       if (c == -1)
         break;
 
@@ -163,6 +171,19 @@ main(int argc, char** argv)
 
         case 's':
           opt_save = 1;
+          break;
+
+        case 'K':
+          if (!strcmp(optarg, "neilb"))
+            opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_NEILB;
+          else if (!strcmp(optarg, "tanner"))
+            opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_TANNER;
+          else
+            {
+              OL_LOG_ERR("Invalid for --kelvin-backend: %s\n",
+                         optarg);
+              return -1;
+            }
           break;
 
         case 'k':
@@ -221,14 +242,16 @@ main(int argc, char** argv)
       goto free_video_backend;
     }
 
-  if (ol_backend_time_init(&time_backend, os_backend.time_index, NULL))
+  if (ol_backend_time_init(&time_backend, os_backend.time_index,
+                           NULL))
     {
       OL_LOG_ERR("Unable to load time backend");
       ret = 5;
       goto free_gamma_backend;
     }
 
-  if (ol_backend_kelvin_init(&kelvin_backend, -1, NULL))
+  if (ol_backend_kelvin_init(&kelvin_backend, opt_kelvin_backend,
+                             NULL))
     {
       OL_LOG_ERR("Unable to load kelvin backend");
       ret = 6;
