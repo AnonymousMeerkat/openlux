@@ -114,7 +114,7 @@ main(int argc, char** argv)
   struct ol_backend_time_s time_backend;
 
   struct ol_color_s default_color;
-  struct ol_color_s current_color;
+  struct ol_color_s current_color = OL_COLOR_WHITE;
 #ifdef OL_CMAKE_USE_IOS
   struct ol_color_s anim_color;
   FILE* color_file;

@@ -92,23 +92,19 @@ void
 ol_backend_gamma_relative_identity(struct ol_backend_gamma_s* self,
                                    int gamma_ramp_size, struct ol_gamma_s gamma)
 {
-  OL_UTIL_UNUSED(self);
-  OL_UTIL_UNUSED(gamma_ramp_size);
-  OL_UTIL_UNUSED(gamma);
-
-  OL_LOG_ERR("Identity not supported for relative gamma");
+  self->rgb(self, gamma_ramp_size, OL_COLOR_WHITE, gamma);
 }
 
 
 struct ol_backend_gamma_s ol_backend_gamma_relative =
-  {
-    .data                = NULL,
-    .needs_default_gamma = 1,
+{
+  .data                = NULL,
+  .needs_default_gamma = 1,
 
-    .init                = ol_backend_gamma_relative_init,
-    .uninit              = ol_backend_gamma_relative_uninit,
+  .init                = ol_backend_gamma_relative_init,
+  .uninit              = ol_backend_gamma_relative_uninit,
 
-    .set_default_gamma   = ol_backend_gamma_relative_set_default_gamma,
-    .rgb                 = ol_backend_gamma_relative_rgb,
-    .identity            = ol_backend_gamma_relative_identity
-  };
+  .set_default_gamma   = ol_backend_gamma_relative_set_default_gamma,
+  .rgb                 = ol_backend_gamma_relative_rgb,
+  .identity            = ol_backend_gamma_relative_identity
+};
