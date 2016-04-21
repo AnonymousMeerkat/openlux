@@ -5,7 +5,6 @@ set(
 
   animate.c
   color.c
-  kelvin.c
   main.c
   )
 
