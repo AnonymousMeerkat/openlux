@@ -113,6 +113,11 @@ main(int argc, char** argv)
   struct ol_backend_gamma_s gamma_backend;
   struct ol_backend_time_s time_backend;
 
+  struct ol_color_t default_color;
+  struct ol_color_t current_color;
+  struct ol_color_t anim_color;
+  FILE* color_file;
+
   struct ol_gamma_s default_gamma_value;
   struct ol_gamma_s current_gamma_value;
   struct ol_gamma_s anim_gamma_value;
@@ -264,21 +269,38 @@ main(int argc, char** argv)
     }
   else if (!opt_identity)
     {
-      struct ol_color_t color = ol_kelvin_rgb(opt_kelvin);
+      current_color = ol_kelvin_rgb(opt_kelvin);
 
-      color.red   = ol_color_parse(opt_red,   color.red);
-      color.green = ol_color_parse(opt_green, color.green);
-      color.blue  = ol_color_parse(opt_blue,  color.blue);
+      current_color.red   = ol_color_parse(opt_red,
+                                           current_color.red);
+      current_color.green = ol_color_parse(opt_green,
+                                           current_color.green);
+      current_color.blue  = ol_color_parse(opt_blue,
+                                           current_color.blue);
 
       gamma_backend.rgb(&gamma_backend,
                         video_backend.gamma_ramp_size,
-                        color, gamma_value);
+                        current_color, gamma_value);
     }
   else
     {
       gamma_backend.identity(&gamma_backend,
                              video_backend.gamma_ramp_size, gamma_value);
     }
+
+
+  /*** Load color ***/
+
+#ifdef OL_CMAKE_USE_IOS
+  default_color = OL_COLOR_WHITE;
+
+  if (os_backend.exists(&os_backend, "color"))
+    {
+      color_file = os_backend.open(&os_backend, "color", "rb");
+      fread(&default_color, 1, sizeof(struct ol_color_t), color_file);
+      fclose(color_file);
+    }
+#endif
 
 
   /*** Set gamma ***/
@@ -295,9 +317,21 @@ main(int argc, char** argv)
            current_time < opt_anim;
            current_time = time_backend.get_time(&time_backend) - start_time)
         {
+#ifndef OL_CMAKE_USE_IOS
           ol_animate_lerp(current_gamma_value, gamma_value, anim_gamma_value,
                           video_backend.gamma_ramp_size,
                           current_time, opt_anim);
+#else
+          ol_animate_lerp_rgb(default_color,
+                              current_color,
+                              &anim_color,
+                              current_time, opt_anim);
+
+          gamma_backend.rgb(&gamma_backend,
+                            video_backend.gamma_ramp_size,
+                            anim_color, anim_gamma_value);
+#endif
+
           video_backend.set_gamma(&video_backend, anim_gamma_value);
 
           time_backend.sleep(&time_backend, opt_delay);
@@ -308,6 +342,15 @@ main(int argc, char** argv)
 
   /* Set gamma */
   video_backend.set_gamma(&video_backend, gamma_value);
+
+
+  /*** Set color ***/
+
+#ifdef OL_CMAKE_USE_IOS
+  color_file = os_backend.open(&os_backend, "color", "wb");
+  fwrite(&current_color, 1, sizeof(struct ol_color_t), color_file);
+  fclose(color_file);
+#endif
 
 
   /*** End ***/

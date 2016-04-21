@@ -45,12 +45,12 @@ endif()
 include(CheckSymbolExists)
 check_symbol_exists(clock_nanosleep "time.h" HAS_CLOCK_NANOSLEEP)
 if (HAS_CLOCK_NANOSLEEP)
-  add_definitions("-DOL_CMAKE_HAVE_CLOCK_NANOSLEEP")
+  add_definitions("-DOL_CMAKE_HAVE_CLOCK_NANOSLEEP=1")
 endif (HAS_CLOCK_NANOSLEEP)
 
 check_symbol_exists(nanosleep "time.h" HAS_NANOSLEEP)
 if (HAS_NANOSLEEP)
-  add_definitions("-DOL_CMAKE_HAVE_NANOSLEEP")
+  add_definitions("-DOL_CMAKE_HAVE_NANOSLEEP=1")
 endif (HAS_NANOSLEEP)
 
 
@@ -71,7 +71,7 @@ if (HAS_IOS AND USE_IOS)
 
   message("Building for iOS")
   set(BUILD_IOS on)
-  add_definitions("-DOL_CMAKE_USE_IOS")
+  add_definitions("-DOL_CMAKE_USE_IOS=1")
   set(VIDEO_BACKEND_LIBS "")
 
   set(CMAKE_OSX_SYSROOT ${SDK_ROOT})
@@ -84,7 +84,7 @@ else ()
   if (HAS_X11 AND USE_X11)
     message("Building with X11 support")
     set(BUILD_X11 on)
-    add_definitions("-DOL_CMAKE_USE_X11")
+    add_definitions("-DOL_CMAKE_USE_X11=1")
     set(VIDEO_BACKEND_LIBS ${X11_LIBRARIES} ${X11_Xxf86vm_LIB})
   endif ()
 

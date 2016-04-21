@@ -25,16 +25,24 @@
 
 
 #include "gamma.h"
+#include "color.h"
 #include "backend/time/time.h"
 #include <stdint.h>
 
 
 void ol_animate_lerp(struct ol_gamma_s current,
-                       struct ol_gamma_s new,
-                       struct ol_gamma_s anim,
-                       int gamma_ramp_size,
-                       ol_time_t time,
-                       ol_time_t end_time);
+                     struct ol_gamma_s new,
+                     struct ol_gamma_s anim,
+                     int gamma_ramp_size,
+                     ol_time_t time,
+                     ol_time_t end_time);
+
+void
+ol_animate_lerp_rgb(struct ol_color_t current,
+                    struct ol_color_t new,
+                    struct ol_color_t* anim,
+                    ol_time_t time,
+                    ol_time_t end_time);
 
 
 #endif
