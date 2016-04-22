@@ -27,6 +27,9 @@
 #include "../../color.h"
 
 
+typedef double ol_kelvin_t;
+
+
 struct ol_backend_kelvin_s;
 struct ol_backend_kelvin_s
 {
@@ -36,7 +39,7 @@ struct ol_backend_kelvin_s
   void (*uninit)(struct ol_backend_kelvin_s* self);
 
   struct ol_color_s (*kelvin)(struct ol_backend_kelvin_s* self,
-                              double kelvin);
+                              ol_kelvin_t kelvin);
 };
 
 

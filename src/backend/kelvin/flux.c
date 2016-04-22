@@ -53,7 +53,7 @@ _ol_flux_curve(double curvei, double kelvin)
 extern float* ol_backend_kelvin_flux_data;
 
 void
-_ol_flux_kelvinkore(double kelvin,
+_ol_flux_kelvinkore(ol_kelvin_t kelvin,
                     ol_color_channel_t* red,
                     ol_color_channel_t* green,
                     ol_color_channel_t* blue)
@@ -81,7 +81,7 @@ _ol_flux_kelvinkore(double kelvin,
 }
 
 void
-_ol_flux_normkk(double kelvin,
+_ol_flux_normkk(ol_kelvin_t kelvin,
                 ol_color_channel_t* red,
                 ol_color_channel_t* green,
                 ol_color_channel_t* blue)
@@ -166,7 +166,7 @@ _ol_flux_processrgb(ol_color_channel_t ired,
 }
 
 void
-_ol_flux_kelvin_raw(double kelvin,
+_ol_flux_kelvin_raw(ol_kelvin_t kelvin,
                     ol_color_channel_t* ored,
                     ol_color_channel_t* ogreen,
                     ol_color_channel_t* oblue)
@@ -189,7 +189,7 @@ ol_color_channel_t _ol_flux_whitekgreen = 0.0;
 ol_color_channel_t _ol_flux_whitekblue  = 0.0;
 
 void
-_ol_flux_kelvin(double kelvin,
+_ol_flux_kelvin(ol_kelvin_t kelvin,
                 ol_color_channel_t* red,
                 ol_color_channel_t* green,
                 ol_color_channel_t* blue)
@@ -230,7 +230,7 @@ _ol_flux_kelvin(double kelvin,
 
 struct ol_color_s
 ol_backend_kelvin_flux_kelvin(struct ol_backend_kelvin_s* self,
-                              double kelvin)
+                              ol_kelvin_t kelvin)
 {
   OL_UTIL_UNUSED(self);
 

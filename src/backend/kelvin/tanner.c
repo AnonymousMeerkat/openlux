@@ -44,7 +44,7 @@ ol_backend_kelvin_tanner_uninit(struct ol_backend_kelvin_s* self)
    http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/ */
 struct ol_color_s
 ol_backend_kelvin_tanner_kelvin(struct ol_backend_kelvin_s* self,
-                                double kelvin)
+                                ol_kelvin_t kelvin)
 {
   OL_UTIL_UNUSED(self);
 

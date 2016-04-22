@@ -44,7 +44,7 @@ ol_backend_kelvin_neilb_uninit(struct ol_backend_kelvin_s* self)
    http://www.zombieprototypes.com/?p=210 */
 struct ol_color_s
 ol_backend_kelvin_neilb_kelvin(struct ol_backend_kelvin_s* self,
-                               double kelvin)
+                               ol_kelvin_t kelvin)
 {
   OL_UTIL_UNUSED(self);
 
