@@ -67,6 +67,7 @@ ol_main_help(char* argv0)
     " -K, --kelvin-backend  kelvin algorithm backend, one of these:\n"
     "                           neilb (default)\n"
     "                           tanner\n"
+    "                           flux\n"
     "\n"
     " -R, --reset           resets display gamma to last saved gamma\n"
     " -s, --save            saves current gamma (automatically done when\n"
