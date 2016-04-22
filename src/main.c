@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "backend/os/os.h"
 #include "backend/video/video.h"
@@ -189,8 +190,18 @@ main(int argc, char** argv)
             }
           break;
 
+#define SAFEATOI(opt)                                   \
+          if (optarg[0] == '.' || isdigit(optarg[0]))   \
+            opt = atoi(optarg);                         \
+          else                                          \
+            {                                           \
+              OL_LOG_ERR("Invalid number: %s",          \
+                         optarg);                       \
+              return -1;                                \
+            }
+
         case 'k':
-          opt_kelvin = atoi(optarg);
+          SAFEATOI(opt_kelvin);
           break;
 
         case 'r':
@@ -206,11 +217,11 @@ main(int argc, char** argv)
           break;
 
         case 'a':
-          opt_anim = atoi(optarg);
+          SAFEATOI(opt_anim);
           break;
 
         case 'd':
-          opt_delay = atoi(optarg);
+          SAFEATOI(opt_delay);
           break;
 
         default:
