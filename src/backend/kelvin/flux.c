@@ -42,7 +42,8 @@ ol_backend_kelvin_flux_uninit(struct ol_backend_kelvin_s* self)
 
 /*** F.lux's windows algorithm, as of 21 april 2016 ***/
 
-double _ol_flux_curve(double curvei, double kelvin)
+double
+_ol_flux_curve(double curvei, double kelvin)
 {
   return
     pow(curvei * 0.000000001, -5.0) *
@@ -51,15 +52,16 @@ double _ol_flux_curve(double curvei, double kelvin)
 
 extern float* ol_backend_kelvin_flux_data;
 
-void _ol_flux_kelvinkore(double kelvin,
-                         float* red,
-                         float* green,
-                         float* blue)
+void
+_ol_flux_kelvinkore(double kelvin,
+                    ol_color_channel_t* red,
+                    ol_color_channel_t* green,
+                    ol_color_channel_t* blue)
 {
   int curvei;
   float *datap = ol_backend_kelvin_flux_data;
-  float curve;
-  double temp;
+  double curve;
+  ol_color_channel_t temp;
 
   *red = 0.0;
   *green = 0.0;
@@ -78,12 +80,13 @@ void _ol_flux_kelvinkore(double kelvin,
     }
 }
 
-void _ol_flux_normkk(double kelvin,
-                     float* red,
-                     float* green,
-                     float* blue)
+void
+_ol_flux_normkk(double kelvin,
+                ol_color_channel_t* red,
+                ol_color_channel_t* green,
+                ol_color_channel_t* blue)
 {
-  float total;
+  ol_color_channel_t total;
 
   _ol_flux_kelvinkore(kelvin, red, green, blue);
 
@@ -94,9 +97,10 @@ void _ol_flux_normkk(double kelvin,
   *blue  /= total;
 }
 
-double _ol_flux_processchannel(float channel)
+ol_color_channel_t
+_ol_flux_processchannel(ol_color_channel_t channel)
 {
-  float temp;
+  ol_color_channel_t temp;
 
   if (channel > 0.0031308)
     {
@@ -109,11 +113,12 @@ double _ol_flux_processchannel(float channel)
     }
 }
 
-void _ol_flux_normrgb(float* red,
-                      float* green,
-                      float* blue)
+void
+_ol_flux_normrgb(ol_color_channel_t* red,
+                 ol_color_channel_t* green,
+                 ol_color_channel_t* blue)
 {
-  double maxchannel = *red;
+  ol_color_channel_t maxchannel = *red;
 
   if (maxchannel < *green)
     maxchannel = *green;
@@ -141,12 +146,13 @@ void _ol_flux_normrgb(float* red,
 
 }
 
-void _ol_flux_processrgb(float ired,
-                         float igreen,
-                         float iblue,
-                         float* ored,
-                         float* ogreen,
-                         float* oblue)
+void
+_ol_flux_processrgb(ol_color_channel_t ired,
+                    ol_color_channel_t igreen,
+                    ol_color_channel_t iblue,
+                    ol_color_channel_t* ored,
+                    ol_color_channel_t* ogreen,
+                    ol_color_channel_t* oblue)
 {
   *ored   = (ired * 3.2406)   - (igreen * 1.5372) - (iblue * 0.4986);
   *ogreen = (igreen * 1.8758) - (ired * 0.9689)   + (iblue * 0.0415);
@@ -159,34 +165,36 @@ void _ol_flux_processrgb(float ired,
   _ol_flux_normrgb(ored, ogreen, oblue);
 }
 
-void _ol_flux_kelvin_raw(float kelvin,
-                         float* ored,
-                         float* ogreen,
-                         float* oblue)
+void
+_ol_flux_kelvin_raw(double kelvin,
+                    ol_color_channel_t* ored,
+                    ol_color_channel_t* ogreen,
+                    ol_color_channel_t* oblue)
 {
-  float red;
-  float green;
-  float blue;
+  ol_color_channel_t red;
+  ol_color_channel_t green;
+  ol_color_channel_t blue;
 
   _ol_flux_normkk(kelvin, &red, &green, &blue);
 
   if (red != 0.0 && green != 0.0 && blue != 0.0)
     {
       _ol_flux_processrgb( red,  green,  blue,
-                          ored, ogreen, oblue);
+                           ored, ogreen, oblue);
     }
 }
 
-float _ol_flux_whitekred   = 0.0;
-float _ol_flux_whitekgreen = 0.0;
-float _ol_flux_whitekblue  = 0.0;
+ol_color_channel_t _ol_flux_whitekred   = 0.0;
+ol_color_channel_t _ol_flux_whitekgreen = 0.0;
+ol_color_channel_t _ol_flux_whitekblue  = 0.0;
 
-void _ol_flux_kelvin(float kelvin,
-                     float* red,
-                     float* green,
-                     float* blue)
+void
+_ol_flux_kelvin(double kelvin,
+                ol_color_channel_t* red,
+                ol_color_channel_t* green,
+                ol_color_channel_t* blue)
 {
-  float temp;
+  ol_color_channel_t temp;
 
   if (_ol_flux_whitekred == 0.0)
     {
@@ -230,12 +238,7 @@ ol_backend_kelvin_flux_kelvin(struct ol_backend_kelvin_s* self,
   ol_color_channel_t green = 0.;
   ol_color_channel_t blue  = 0.;
 
-  float rgb1, rgb2, rgb3;
-
-  _ol_flux_kelvin(kelvin, &rgb1, &rgb2, &rgb3);
-  red   = rgb1;
-  green = rgb2;
-  blue  = rgb3;
+  _ol_flux_kelvin(kelvin, &red, &green, &blue);
 
   red   = OL_COLOR_LIMIT(red);
   green = OL_COLOR_LIMIT(green);
