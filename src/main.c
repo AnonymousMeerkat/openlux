@@ -178,6 +178,8 @@ main(int argc, char** argv)
             opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_NEILB;
           else if (!strcmp(optarg, "tanner"))
             opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_TANNER;
+          else if (!strcmp(optarg, "flux"))
+            opt_kelvin_backend = OL_BACKEND_KELVIN_INDEX_FLUX;
           else
             {
               OL_LOG_ERR("Invalid option for --kelvin-backend: %s",

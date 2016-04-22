@@ -42,6 +42,7 @@ struct ol_backend_kelvin_s
 
 #define OL_BACKEND_KELVIN_INDEX_NEILB  0
 #define OL_BACKEND_KELVIN_INDEX_TANNER 1
+#define OL_BACKEND_KELVIN_INDEX_FLUX   2
 
 int ol_backend_kelvin_init(struct ol_backend_kelvin_s* self, int index, void* data);
 
