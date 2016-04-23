@@ -58,12 +58,12 @@ ol_main_help(char* argv0)
     "\n"
     "Options:\n"
     " -k, --kelvin          color temperature in kelvin (1000-40000,\n"
-    "                           default: 3400)\n"
+    "                         default: 3400)\n"
     " -r, --red             red color channel (0-255, default: auto)\n"
     " -g, --green           green color channel (0-255, default: auto)\n"
     " -b, --blue            blue color channel (0-255, default: auto)\n"
     " -i, --identity        resets display gamma to identity\n"
-    "                           (no color bias)\n"
+    "                         (no color bias)\n"
     "\n"
     " -K, --kelvin-backend  kelvin algorithm backend, one of these:\n"
     "                           neilb (default)\n"
@@ -72,11 +72,15 @@ ol_main_help(char* argv0)
     "\n"
     " -R, --reset           resets display gamma to last saved gamma\n"
     " -s, --save            saves current gamma (automatically done when\n"
-    "                           openlux is run for the first time on boot)\n"
+    "                         openlux is run for the first time on boot)\n"
     "\n"
     " -a, --animate         animation time in milliseconds (default: 0)\n"
     " -d, --delay           animation delay per \"frame\" in milliseconds\n"
-    "                           (default: 0)\n"
+    "                         (default: 0)\n"
+    "\n"
+    " -p, --print           prints internal variables, variables to print\n"
+    "                         are comma-separated, or use 'all' to print\n"
+    "                         all variables.\n"
     "\n"
     " -h, --help            display this help and exit\n"
     " -V, --version         display version information and exit\n";
@@ -94,10 +98,12 @@ static struct option _ol_main_long_options[] = {
   {"save",           no_argument,       0, 's'},
   {"animate",        required_argument, 0, 'a'},
   {"delay",          required_argument, 0, 'd'},
+  {"print",          required_argument, 0, 'p'},
   {"help",           no_argument,       0, 'h'},
   {"version",        no_argument,       0, 'V'},
   {0, 0, 0, 0}
 };
+
 
 int
 main(int argc, char** argv)
@@ -114,6 +120,7 @@ main(int argc, char** argv)
   bool opt_reset          = 0;
   int  opt_anim           = 0;
   int  opt_delay          = 0;
+  char opt_print[1024]    = ",";
 
   int c;
   int option_index;
@@ -145,7 +152,7 @@ main(int argc, char** argv)
 
   while (1)
     {
-      c = getopt_long(argc, argv, "hVk:r:g:b:iK:Rsa:d:",
+      c = getopt_long(argc, argv, "hVk:r:g:b:iK:Rsa:d:p:",
                       _ol_main_long_options, &option_index);
       if (c == -1)
         break;
@@ -224,11 +231,63 @@ main(int argc, char** argv)
           SAFEATOI(opt_delay);
           break;
 
+        case 'p':
+          strcat(opt_print, optarg);
+          strcat(opt_print, ",");
+          break;
+
         default:
           ol_main_help(argv[0]);
           return 1;
         }
     }
+
+#define OL_PRINT_VARIABLE_RAW(name, cmd)        \
+  {                                             \
+    if (!strstr(opt_print, ",-"name",") &&      \
+        (strstr(opt_print, ",all,") ||          \
+         strstr(opt_print, ","name",")))        \
+      {                                         \
+        printf(name": ");                       \
+        cmd                                     \
+      }                                         \
+  }
+
+#define OL_PRINT_VARIABLE(name, ...)            \
+  OL_PRINT_VARIABLE_RAW(name,                   \
+                        printf(__VA_ARGS__);    \
+                        puts("");               \
+                        );
+
+#define OL_PRINT_COLOR(name, variable)                  \
+  OL_PRINT_VARIABLE(name, "%f %f %f, %i %i %i",         \
+                    variable.red,                       \
+                    variable.green,                     \
+                    variable.blue,                      \
+                    (int)(variable.red * 255),          \
+                    (int)(variable.green * 255),        \
+                    (int)(variable.blue * 255))
+
+#define OL_PRINT_GAMMA(name, variable, gamma_ramp_size)                 \
+  OL_PRINT_VARIABLE_RAW(name,                                           \
+                        printf("R ");                                   \
+                        for (int i = 0; i < gamma_ramp_size; i++)       \
+                          {                                             \
+                            printf("%i ", variable.red[i]);             \
+                          }                                             \
+                        printf("G ");                                   \
+                        for (int i = 0; i < gamma_ramp_size; i++)       \
+                          {                                             \
+                            printf("%i ", variable.green[i]);           \
+                          }                                             \
+                        printf("B ");                                   \
+                        for (int i = 0; i < gamma_ramp_size; i++)       \
+                          {                                             \
+                            printf("%i ", variable.blue[i]);            \
+                          }                                             \
+                        puts("");                                       \
+                        );
+
 
 
   /*** Load backends ***/
@@ -272,6 +331,9 @@ main(int argc, char** argv)
       goto free_kelvin_backend;
     }
 
+
+  OL_PRINT_VARIABLE("gamma_ramp_size", "%i",
+                    video_backend.gamma_ramp_size);
 
   OL_GAMMA_MALLOC(video_backend.gamma_ramp_size, current_gamma_value);
   video_backend.get_gamma(&video_backend, current_gamma_value);
@@ -326,12 +388,20 @@ main(int argc, char** argv)
       current_color.blue  = ol_color_parse(opt_blue,
                                            current_color.blue);
 
+      OL_PRINT_COLOR("color", current_color);
+
       gamma_backend.rgb(&gamma_backend,
                         video_backend.gamma_ramp_size,
                         current_color, gamma_value);
+
+      OL_PRINT_GAMMA("gamma", gamma_value,
+                     video_backend.gamma_ramp_size);
     }
   else
     {
+      current_color = OL_COLOR_WHITE;
+      OL_PRINT_COLOR("current_color", current_color);
+
       gamma_backend.identity(&gamma_backend,
                              video_backend.gamma_ramp_size, gamma_value);
     }
@@ -348,6 +418,8 @@ main(int argc, char** argv)
       fread(&default_color, 1, sizeof(struct ol_color_s), color_file);
       fclose(color_file);
     }
+
+  OL_PRINT_COLOR("default_color", default_color);
 #endif
 
 
